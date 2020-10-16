@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import PrivateRoute from './PrivateRoute';
+import Navs from '../layout/Navs';
 import Login from '../auth/Login';
+import ChangePassword from '../auth/ChangePassword'
+import Dashboard from '../dashboard/Dashboard';
 
 const Routes = () => {
   return (
-    <div className="container">
-      <Switch>
-        <Route exact path="/login" component={Login} />
-      </Switch>
-    </div>
+    <Fragment>
+      <Navs />
+      <div className="container">
+        <Switch>
+          <Route exact path="/login" component={Login} />
+          <PrivateRoute exact path="/change-password" component={ChangePassword} />
+          <PrivateRoute exact path="/dashboard" component={Dashboard} />
+        </Switch>
+      </div>
+    </Fragment>
   );
 };
 
