@@ -8,6 +8,7 @@ import {
   SET_AUTH_LOADING
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
+import { setAlert } from './alert';
 
 // Load User
 export const loadUser = () => async dispatch => {
@@ -53,6 +54,14 @@ export const login = (email, password) => async dispatch => {
 
     dispatch(loadUser());
   } catch (err) {
+    // console.log(err);
+    const errors = err.response.data.errors;
+
+    if (errors) {
+      console.log(errors);
+      errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+    }
+
     dispatch({
       type: LOGIN_FAIL
     });
@@ -63,8 +72,8 @@ export const login = (email, password) => async dispatch => {
 export const logout = () => dispatch => {
   dispatch({
     type: LOGOUT
-  })
-}
+  });
+};
 
 // Set auth loading
 export const setAuthLoading = () => dispatch => {

@@ -50,13 +50,17 @@ router.post(
     try {
       const user = await User.findOne({ email });
       if (!user) {
-        return res.status(401).json({ msg: 'Некорректные учетные данные' });
+        return res
+          .status(401)
+          .json({ errors: [{ msg: 'Некорректные учетные данные' }] });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
-        return res.status(401).json({ msg: 'Некорректные учетные данные' });
+        return res
+          .status(401)
+          .json({ errors: [{ msg: 'Некорректные учетные данные' }] });
       }
 
       const payload = {
@@ -77,7 +81,7 @@ router.post(
       );
     } catch (err) {
       console.error(err.message);
-      return res.status(500).json({ msg: 'Ошибка сервера' });
+      return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
     }
   }
 );
