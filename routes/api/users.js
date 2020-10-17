@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const { ensureAdmin } = require('../../middleware/auth');
+const { ensureAdmin, ensureAuth } = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
 const User = require('../../models/User');
@@ -78,6 +78,52 @@ router.post(
     } catch (err) {
       console.error(err.message);
       return res.status(500).json({ msg: 'Ошибка сервера' });
+    }
+  }
+);
+
+// @route   POST api/users/password
+// @desc    Change password
+// @access  Private
+router.post(
+  '/password',
+  [
+    ensureAuth,
+    [
+      check(
+        'password',
+        'Пожалуйста, укажите корректный пароль пользователя. Пароль должен содержать не менее 8 символов, из которых должна быть как минимум 1 строчная буква латинского алфавита, 1 заглавная буква латинского алфавита и 1 цифра.'
+      ).custom((val, req) => {
+        return val && val.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/);
+      })
+    ]
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { password } = req.body;
+
+    try {
+      let user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res
+          .status(401)
+          .json({ errors: [{ msg: 'Некорректные учетные данные' }] });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+
+      await user.save();
+
+      return res.json({ msg: 'Пароль успешно изменен' });
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
     }
   }
 );
