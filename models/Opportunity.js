@@ -1,31 +1,28 @@
 const mongoose = require('mongoose');
 
 const OpportunitySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  headquarters: {
-    type: String
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'company'
   },
   broker: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'broker'
+  },
+  contactPerson: {
     type: String,
     required: true
-  },
-  reinsurers: [
-    {
-      type: String
-    }
-  ],
-  renewalDate: {
-    type: Date
   },
   deadlineDate: {
     type: Date,
     required: true
   },
-  sentDate: {
-    type: Date
+  responsible: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
   },
   status: {
     type: String,
@@ -34,22 +31,32 @@ const OpportunitySchema = new mongoose.Schema({
   comment: {
     type: String
   },
-  responsible: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+  sentDate: {
+    type: Date
   },
   quoteType: {
     type: String
   },
-  contactPerson: {
-    type: String,
-    required: true
+  renewalDate: {
+    type: Date
   },
+  reinsurers: [
+    {
+      _id: false,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'reinsurer'
+    }
+  ],
   premium: {
     type: Number
   },
   population: {
     type: Number
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
   },
   createdAt: {
     type: Date,

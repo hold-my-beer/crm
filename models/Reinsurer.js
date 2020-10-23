@@ -5,19 +5,12 @@ const ReinsurerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  employees: [
-    {
-      firstName: {
-        type: String,
-        required: true
-      },
-      secondName: {
-        type: String,
-        required: true
-      }
-    }
-  ],
-  date: {
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
+  },
+  createdAt: {
     type: Date,
     default: Date.now
   }

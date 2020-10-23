@@ -1,22 +1,26 @@
 const mongoose = require('mongoose');
 
-const BrokerSchema = new mongoose.Schema({
+const CompanySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
   },
-  employees: [
+  entities: [
     {
-      firstName: {
+      name: {
         type: String,
         required: true
       },
-      secondName: {
-        type: String,
-        required: true
+      activityType: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'activityType'
       }
     }
   ],
+  rightToMention: {
+    type: String
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
@@ -28,4 +32,4 @@ const BrokerSchema = new mongoose.Schema({
   }
 });
 
-module.exports = Broker = mongoose.model('broker', BrokerSchema);
+module.exports = Company = mongoose.model('company', CompanySchema);
