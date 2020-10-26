@@ -7,11 +7,10 @@ import {
   LOGOUT,
   CHANGE_PASSWORD_SUCCESS,
   CHANGE_PASSWORD_FAIL,
-  SET_AUTH_LOADING,
-  REMOVE_ALERT
+  SET_AUTH_LOADING
 } from './types';
 import setAuthToken from '../utils/setAuthToken';
-import { setAlert } from './alert';
+import { setAlert, removeAlert } from './alert';
 
 // Load User
 export const loadUser = () => async dispatch => {
@@ -37,9 +36,7 @@ export const loadUser = () => async dispatch => {
 
 // Login User
 export const login = (email, password) => async dispatch => {
-  dispatch({
-    type: REMOVE_ALERT
-  });
+  dispatch(removeAlert());
 
   dispatch(setAuthLoading());
 
@@ -77,6 +74,8 @@ export const login = (email, password) => async dispatch => {
 
 // Logout user
 export const logout = () => dispatch => {
+  dispatch(removeAlert());
+
   dispatch({
     type: LOGOUT
   });
@@ -84,9 +83,7 @@ export const logout = () => dispatch => {
 
 // Change password
 export const changePassword = password => async dispatch => {
-  dispatch({
-    type: REMOVE_ALERT
-  });
+  dispatch(removeAlert());
 
   dispatch(setAuthLoading());
 

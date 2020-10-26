@@ -4,6 +4,8 @@ const { ensureAuth } = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
 const Opportunity = require('../../models/Opportunity');
+const Company = require('../../models/Company');
+const Broker = require('../../models/Broker');
 
 // @route   POST api/opportunities
 // @desc    Create opportunity
@@ -40,7 +42,9 @@ router.post(
 
     const {
       company,
+      // companyId,
       broker,
+      // brokerId,
       contactPerson,
       deadlineDate,
       responsible,
@@ -54,10 +58,43 @@ router.post(
       // population
     } = req.body;
 
+    let { companyId, brokerId } = req.body;
+
     try {
+      if (!companyId) {
+        const newCompany = new Company({
+          name: company,
+          createdBy: req.user.id
+        });
+
+        await newCompany.save();
+        companyId = newCompany._id;
+      }
+
+      if (!brokerId) {
+        const newBroker = new Broker({
+          name: broker,
+          employees: [{ name: contactPerson }],
+          createdBy: req.user.id
+        });
+
+        await newBroker.save();
+        brokerId = newBroker._id;
+      } else {
+        let brokerToUpdate = await Broker.findById(brokerId);
+        if (
+          brokerToUpdate.employees
+            .map(employee => employee.name)
+            .indexOf(contactPerson) == -1
+        ) {
+          brokerToUpdate.employees.push({ name: contactPerson });
+          await brokerToUpdate.save();
+        }
+      }
+
       const opportunity = new Opportunity({
-        company,
-        broker,
+        company: companyId,
+        broker: brokerId,
         contactPerson,
         deadlineDate,
         responsible,

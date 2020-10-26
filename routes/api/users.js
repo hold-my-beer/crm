@@ -6,6 +6,20 @@ const { check, validationResult } = require('express-validator');
 
 const User = require('../../models/User');
 
+// @route   GET api/users
+// @desc    Get all users
+// @access  Private
+router.get('/', ensureAuth, async (req, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ secondName: 1 });
+
+    return res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ msg: 'Ошибка сервера' });
+  }
+});
+
 // @route   POST api/users
 // @desc    Register user
 // @access  Private

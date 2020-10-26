@@ -5,6 +5,20 @@ const { check, validationResult } = require('express-validator');
 
 const Broker = require('../../models/Broker');
 
+// @route   GET api/brokers
+// @desc    Get all brokers
+// @access  Private
+router.get('/', ensureAuth, async (req, res) => {
+  try {
+    const brokers = await Broker.find().sort({ name: 1 });
+
+    return res.json(brokers);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+  }
+});
+
 // @route   POST api/brokers
 // @desc    Create broker
 // @access  Private

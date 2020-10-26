@@ -1,0 +1,292 @@
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { addOpportunity } from '../../actions/opportunity';
+import { getCompanies } from '../../actions/company';
+import { getBrokers } from '../../actions/broker';
+import { getUsers } from '../../actions/user';
+import PropTypes from 'prop-types';
+
+const CreateOpportunity = ({
+  addOpportunity,
+  getCompanies,
+  getBrokers,
+  getUsers,
+  company: { companies },
+  broker: { brokers },
+  user: { users }
+}) => {
+  const [formData, setFormData] = useState({
+    company: '',
+    companyId: '',
+    broker: '',
+    brokerId: '',
+    contactPerson: '',
+    deadlineDate: '',
+    responsible: '',
+    comment: '',
+    quoteType: '',
+    renewalDate: ''
+  });
+
+  const [className, setClassName] = useState('additional-opportunity-data');
+
+  const {
+    company,
+    companyId,
+    broker,
+    brokerId,
+    contactPerson,
+    deadlineDate,
+    responsible,
+    comment,
+    quoteType,
+    renewalDate
+  } = formData;
+
+  const getId = (name, val) => {
+    switch (name) {
+      case 'company': {
+        for (let i = 0; i < companies.length; i++) {
+          if (companies[i].name === val) {
+            return companies[i]._id;
+          }
+        }
+        return '';
+      }
+      case 'broker': {
+        for (let i = 0; i < brokers.length; i++) {
+          if (brokers[i].name === val) {
+            return brokers[i]._id;
+          }
+        }
+        return '';
+      }
+      default:
+        return '';
+    }
+  };
+
+  const onChange = e => {
+    const name = e.target.name;
+    const val = e.target.value;
+
+    setFormData({
+      ...formData,
+      [name]: val,
+      companyId: name === 'company' ? getId('company', val) : companyId,
+      brokerId: name === 'broker' ? getId('broker', val) : brokerId
+    });
+  };
+
+  const onSubmit = e => {
+    e.preventDefault();
+    addOpportunity(formData);
+  };
+
+  useEffect(() => {
+    getCompanies();
+    getBrokers();
+    getUsers();
+  }, []);
+
+  return (
+    <div className="create-opportunity">
+      <h1 className="my-1">Создать тендер</h1>
+      <p className="lead">Создайте новый тендер</p>
+      <small>* поля, обязательные для заполнения</small>
+      <form onSubmit={e => onSubmit(e)}>
+        <div className="parameters">
+          <div className="form-group">
+            <label htmlFor="company">Компания *</label>
+            <input
+              type="text"
+              name="company"
+              id="company"
+              list="companies"
+              placeholder="Начните ввод..."
+              autoComplete="off"
+              value={company}
+              onChange={e => onChange(e)}
+            />
+            <datalist id="companies">
+              {companies &&
+                companies.length > 0 &&
+                companies.map(company => (
+                  <option key={company._id} value={company.name}></option>
+                ))}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label htmlFor="broker">Брокер *</label>
+            <input
+              type="text"
+              name="broker"
+              id="broker"
+              list="brokers"
+              placeholder="Начните ввод..."
+              autoComplete="off"
+              value={broker}
+              onChange={e => onChange(e)}
+            />
+            <datalist id="brokers">
+              {brokers &&
+                brokers.length > 0 &&
+                brokers.map(broker => (
+                  <option key={broker._id} value={broker.name}></option>
+                ))}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label htmlFor="contactPerson">Контактное лицо *</label>
+            <input
+              type="text"
+              name="contactPerson"
+              id="contactPerson"
+              list="contactPersons"
+              placeholder="Начните ввод..."
+              value={contactPerson}
+              onChange={e => onChange(e)}
+            />
+            <datalist id="contactPersons">
+              {brokers &&
+                brokers.length > 0 &&
+                brokers.forEach(
+                  item =>
+                    item.name === broker &&
+                    item.employees.length > 0 &&
+                    item.employees.map(employee => (
+                      <option key={employee._id} value={employee.name}></option>
+                    ))
+                )}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label htmlFor="deadlineDate">Дедлайн *</label>
+            <input
+              type="date"
+              id="deadlineDate"
+              name="deadlineDate"
+              value={deadlineDate}
+              onChange={e => onChange(e)}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="responsible">Ответственный *</label>
+            <select
+              name="responsible"
+              id="responsible"
+              // placeholder="Выберите ответственного сотрудника"
+              value={responsible}
+              onChange={e => onChange(e)}
+            >
+              <option />
+              {users &&
+                users.length > 0 &&
+                users.map(user => (
+                  <option key={user._id} value={user._id}>
+                    {user.secondName}
+                  </option>
+                ))}
+            </select>
+            {/* <input
+              type="text"
+              name="responsible"
+              id="responsible"
+              list="responsibles"
+              placeholder="Начните ввод..."
+              autoComplete="off"
+              value={responsible}
+              onChange={e => onChange(e)}
+            />
+            <datalist id="responsibles">
+              {users &&
+                users.length > 0 &&
+                users.map(user => (
+                  <option key={user._id} value={user.secondName}></option>
+                ))}
+            </datalist> */}
+          </div>
+          <div className="form-group">
+            <label htmlFor="comment">Комментарий</label>
+            <textarea
+              name="comment"
+              id="comment"
+              rows="5"
+              value={comment}
+              onChange={e => onChange(e)}
+            ></textarea>
+          </div>
+          <p
+            className="additional-data-label"
+            onClick={e =>
+              setClassName(
+                className.indexOf('show') > 0
+                  ? 'additional-opportunity-data'
+                  : 'additional-opportunity-data show'
+              )
+            }
+          >
+            Дополнительные данные
+          </p>
+          <div className={className}>
+            <div className="form-group">
+              <label htmlFor="quoteType">Тип тендера</label>
+              <input
+                type="text"
+                name="quoteType"
+                id="quoteType"
+                list="quoteTypes"
+                placeholder="Начните ввод..."
+                value={quoteType}
+                onChange={e => onChange(e)}
+              />
+              <datalist id="quoteTypes">
+                <option value="Реальный"></option>
+                <option value="Формальный"></option>
+                <option value="Пролонгация"></option>
+              </datalist>
+            </div>
+            <div className="form-group">
+              <label htmlFor="renewalDate">Дата пролонгации</label>
+              <input
+                type="date"
+                id="renewalDate"
+                name="renewalDate"
+                value={renewalDate}
+                onChange={e => onChange(e)}
+              />
+            </div>
+          </div>
+        </div>
+        <input
+          type="submit"
+          className="btn btn-primary btn-block"
+          value="Создать"
+        />
+      </form>
+    </div>
+  );
+};
+
+CreateOpportunity.propTypes = {
+  addOpportunity: PropTypes.func.isRequired,
+  getCompanies: PropTypes.func.isRequired,
+  getBrokers: PropTypes.func.isRequired,
+  getUsers: PropTypes.func.isRequired,
+  company: PropTypes.object.isRequired,
+  broker: PropTypes.object.isRequired,
+  user: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => ({
+  company: state.company,
+  broker: state.broker,
+  user: state.user
+});
+
+export default connect(mapStateToProps, {
+  addOpportunity,
+  getCompanies,
+  getBrokers,
+  getUsers
+})(CreateOpportunity);

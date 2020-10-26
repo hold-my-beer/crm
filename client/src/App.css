@@ -552,7 +552,7 @@ td.sticky-column {
   white-space: unset;
 }
 
-/* Tenders */
+/* Opportunities */
 .search-labels {
   width: 100%;
   display: flex;
@@ -672,7 +672,7 @@ td.sticky-column {
   margin-bottom: 1rem;
 }
 
-/* Create Tender */
+/* Create Opportunity */
 .additional-data-label {
   color: var(--primary-color);
 }
@@ -682,11 +682,11 @@ td.sticky-column {
   opacity: 0.8;
 }
 
-.additional-tender-data {
+.additional-opportunity-data {
   display: none;
 }
 
-.additional-tender-data.show {
+.additional-opportunity-data.show {
   display: block;
   transition: all 0.2s ease-in-out;
 }

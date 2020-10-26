@@ -5,6 +5,20 @@ const { check, validationResult } = require('express-validator');
 
 const Reinsurer = require('../../models/Reinsurer');
 
+// @route   GET api/reinsurers
+// @desc    Get all reinsurers
+// @access  Private
+router.get('/', ensureAuth, async (req, res) => {
+  try {
+    const reinsurers = await Reinsurer.find().sort({ name: 1 });
+
+    return res.json(reinsurers);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+  }
+});
+
 // @route   POST api/reinsurers
 // @desc    Create reinsurer
 // @access  Private

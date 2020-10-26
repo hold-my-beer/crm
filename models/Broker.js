@@ -7,11 +7,7 @@ const BrokerSchema = new mongoose.Schema({
   },
   employees: [
     {
-      firstName: {
-        type: String,
-        required: true
-      },
-      secondName: {
+      name: {
         type: String,
         required: true
       }

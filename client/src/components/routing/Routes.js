@@ -6,6 +6,8 @@ import Login from '../auth/Login';
 import ChangePassword from '../auth/ChangePassword';
 import Dashboard from '../dashboard/Dashboard';
 import Alert from '../layout/Alert';
+import Opportunities from '../opportunities/Opportunities';
+import CreateOpportunity from '../opportunities/CreateOpportunity';
 
 const Routes = () => {
   return (
@@ -21,6 +23,12 @@ const Routes = () => {
             component={ChangePassword}
           />
           <PrivateRoute exact path="/dashboard" component={Dashboard} />
+          <PrivateRoute exact path="/opportunities" component={Opportunities} />
+          <PrivateRoute
+            exact
+            path="/create-opportunity"
+            component={CreateOpportunity}
+          />
         </Switch>
       </div>
     </Fragment>
