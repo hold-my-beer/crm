@@ -1,4 +1,27 @@
 {
   "MongoURI": "mongodb+srv://sergei123:sergei123@crm-mern.zcfkr.mongodb.net/crm_mern?retryWrites=true&w=majority",
-  "jwtSecret": "secretsecret"
+  "jwtSecret": "secretsecret",
+  "constants": {
+    "QUOTE_TYPES": ["Реальный", "Формальный", "Пролонгация", "Расширение"],
+    "SORT_OPPORTUNITIES_BY": [
+      "Новые",
+      "Ближайший дедлайн",
+      "Ближайшая пролонгация",
+      "Большая сумма премии"
+    ],
+    "DISPLAY_NUMBER": [5, 10, 25, 50],
+    "MIN_DATE": "2000-01-01",
+    "MAX_DATE": "2099-12-31",
+    "STATUSES": [
+      "В работе",
+      "Отправлено",
+      "Выиграли",
+      "Проиграли",
+      "Не состоялся"
+    ],
+    "SUM_MIN": "0",
+    "SUM_MAX": "1000000000",
+    "QUANTITY_MIN": "0",
+    "QUANTITY_MAX": "1000000"
+  }
 }

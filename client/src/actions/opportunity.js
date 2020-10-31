@@ -6,8 +6,6 @@ import {
   GET_OPPORTUNITIES
 } from './types';
 import { setAlert, removeAlert } from './alert';
-// import { addCompany } from './company';
-// import { addBroker } from './broker';
 
 // Get all opportunities
 export const getOpportunities = () => async dispatch => {
@@ -37,7 +35,7 @@ export const getOpportunities = () => async dispatch => {
 };
 
 // Add opportunity
-export const addOpportunity = formData => async dispatch => {
+export const addOpportunity = (formData, history) => async dispatch => {
   dispatch(removeAlert());
 
   dispatch(setOpportunityLoading());
@@ -49,22 +47,14 @@ export const addOpportunity = formData => async dispatch => {
   };
 
   try {
-    // if (!formData.companyId) {
-    //   const company = await addCompany(formData.company);
-    //   formData.companyId = company._id;
-    // }
-
-    // if (!formData.brokerId) {
-    //   const broker = await addBroker(formData.broker);
-    //   formData.brokerId = broker._id;
-    // }
-    // console.log(formData);
     const res = await axios.post('/api/opportunities', formData, config);
 
     dispatch({
       type: ADD_OPPORTUNITY,
       payload: res.data
     });
+
+    history.push('/opportunities');
   } catch (err) {
     const errors = err.response.data.errors;
 

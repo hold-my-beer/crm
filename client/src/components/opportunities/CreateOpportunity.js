@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { addOpportunity } from '../../actions/opportunity';
 import { getCompanies } from '../../actions/company';
@@ -13,7 +14,8 @@ const CreateOpportunity = ({
   getUsers,
   company: { companies },
   broker: { brokers },
-  user: { users }
+  user: { users },
+  history
 }) => {
   const [formData, setFormData] = useState({
     company: '',
@@ -27,6 +29,8 @@ const CreateOpportunity = ({
     quoteType: '',
     renewalDate: ''
   });
+
+  const [brokerEmployees, setBrokerEmployees] = useState([]);
 
   const [className, setClassName] = useState('additional-opportunity-data');
 
@@ -66,6 +70,21 @@ const CreateOpportunity = ({
     }
   };
 
+  const getBrokersEmployees = brokerName => {
+    for (let i = 0; i < brokers.length; i++) {
+      if (brokers[i].name === brokerName) {
+        return brokers[i].employees;
+      }
+    }
+    return [];
+  };
+
+  const fillBrokerEmployees = e => {
+    setBrokerEmployees(
+      brokers && brokers.length > 0 && getBrokersEmployees(e.target.value)
+    );
+  };
+
   const onChange = e => {
     const name = e.target.name;
     const val = e.target.value;
@@ -80,14 +99,14 @@ const CreateOpportunity = ({
 
   const onSubmit = e => {
     e.preventDefault();
-    addOpportunity(formData);
+    addOpportunity(formData, history);
   };
 
   useEffect(() => {
     getCompanies();
     getBrokers();
     getUsers();
-  }, []);
+  }, [getCompanies, getBrokers, getUsers]);
 
   return (
     <div className="create-opportunity">
@@ -126,7 +145,10 @@ const CreateOpportunity = ({
               placeholder="Начните ввод..."
               autoComplete="off"
               value={broker}
-              onChange={e => onChange(e)}
+              onChange={e => {
+                onChange(e);
+                fillBrokerEmployees(e);
+              }}
             />
             <datalist id="brokers">
               {brokers &&
@@ -144,20 +166,14 @@ const CreateOpportunity = ({
               id="contactPerson"
               list="contactPersons"
               placeholder="Начните ввод..."
+              autoComplete="off"
               value={contactPerson}
               onChange={e => onChange(e)}
             />
             <datalist id="contactPersons">
-              {brokers &&
-                brokers.length > 0 &&
-                brokers.forEach(
-                  item =>
-                    item.name === broker &&
-                    item.employees.length > 0 &&
-                    item.employees.map(employee => (
-                      <option key={employee._id} value={employee.name}></option>
-                    ))
-                )}
+              {brokerEmployees.map(employee => (
+                <option key={employee._id} value={employee.name}></option>
+              ))}
             </datalist>
           </div>
           <div className="form-group">
@@ -175,7 +191,6 @@ const CreateOpportunity = ({
             <select
               name="responsible"
               id="responsible"
-              // placeholder="Выберите ответственного сотрудника"
               value={responsible}
               onChange={e => onChange(e)}
             >
@@ -188,23 +203,6 @@ const CreateOpportunity = ({
                   </option>
                 ))}
             </select>
-            {/* <input
-              type="text"
-              name="responsible"
-              id="responsible"
-              list="responsibles"
-              placeholder="Начните ввод..."
-              autoComplete="off"
-              value={responsible}
-              onChange={e => onChange(e)}
-            />
-            <datalist id="responsibles">
-              {users &&
-                users.length > 0 &&
-                users.map(user => (
-                  <option key={user._id} value={user.secondName}></option>
-                ))}
-            </datalist> */}
           </div>
           <div className="form-group">
             <label htmlFor="comment">Комментарий</label>
@@ -289,4 +287,4 @@ export default connect(mapStateToProps, {
   getCompanies,
   getBrokers,
   getUsers
-})(CreateOpportunity);
+})(withRouter(CreateOpportunity));

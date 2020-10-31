@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import auth from './auth';
+import constant from './constant';
 import alert from './alert';
 import opportunity from './opportunity';
 import company from './company';
@@ -9,6 +10,7 @@ import user from './user';
 
 export default combineReducers({
   auth,
+  constant,
   alert,
   opportunity,
   company,
