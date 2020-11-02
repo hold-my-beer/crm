@@ -3,7 +3,8 @@ import {
   ADD_OPPORTUNITY,
   SET_OPPORTUNITY_LOADING,
   OPPORTUNITY_ERROR,
-  GET_OPPORTUNITIES
+  GET_OPPORTUNITIES,
+  GET_OPPORTUNITY
 } from './types';
 import { setAlert, removeAlert } from './alert';
 
@@ -18,6 +19,31 @@ export const getOpportunities = () => async dispatch => {
 
     dispatch({
       type: GET_OPPORTUNITIES,
+      payload: res.data
+    });
+  } catch (err) {
+    const errors = err.response.data.errors;
+
+    if (errors) {
+      errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+    }
+
+    dispatch({
+      type: OPPORTUNITY_ERROR,
+      payload: errors
+    });
+  }
+};
+
+// Get opportunity by id
+export const getOpportunityById = id => async dispatch => {
+  dispatch(setOpportunityLoading());
+
+  try {
+    const res = await axios.get(`/api/opportunities/${id}`);
+
+    dispatch({
+      type: GET_OPPORTUNITY,
       payload: res.data
     });
   } catch (err) {

@@ -12,6 +12,10 @@ router.get('/', ensureAuth, async (req, res) => {
   try {
     const companies = await Company.find().sort({ name: 1 });
 
+    if (!companies) {
+      return res.status(404).json({ msg: 'Компании не найдены' });
+    }
+
     return res.json(companies);
   } catch (err) {
     console.error(err.message);

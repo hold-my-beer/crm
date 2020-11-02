@@ -1,5 +1,6 @@
 import {
   GET_OPPORTUNITIES,
+  GET_OPPORTUNITY,
   ADD_OPPORTUNITY,
   SET_OPPORTUNITY_LOADING,
   OPPORTUNITY_ERROR
@@ -20,6 +21,12 @@ export default function (state = initialState, action) {
       return {
         ...state,
         opportunities: payload,
+        loading: false
+      };
+    case GET_OPPORTUNITY:
+      return {
+        ...state,
+        opportunity: payload,
         loading: false
       };
     case ADD_OPPORTUNITY:

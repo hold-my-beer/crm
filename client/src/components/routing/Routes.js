@@ -8,6 +8,7 @@ import Dashboard from '../dashboard/Dashboard';
 import Alert from '../layout/Alert';
 import Opportunities from '../opportunities/Opportunities';
 import CreateOpportunity from '../opportunities/CreateOpportunity';
+import EditOpportunity from '../opportunities/EditOpportunity';
 
 const Routes = () => {
   return (
@@ -28,6 +29,11 @@ const Routes = () => {
             exact
             path="/create-opportunity"
             component={CreateOpportunity}
+          />
+          <PrivateRoute
+            exact
+            path="/edit-opportunity/:id"
+            component={EditOpportunity}
           />
         </Switch>
       </div>

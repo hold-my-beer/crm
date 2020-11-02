@@ -12,6 +12,10 @@ router.get('/', ensureAuth, async (req, res) => {
   try {
     const reinsurers = await Reinsurer.find().sort({ name: 1 });
 
+    if (!reinsurers) {
+      return res.status(404).json({ msg: 'Перестраховщики не найдены' });
+    }
+
     return res.json(reinsurers);
   } catch (err) {
     console.error(err.message);

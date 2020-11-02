@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { getConstants } from '../../actions/constant';
 import PropTypes from 'prop-types';
 
-const Dashboard = props => {
+const Dashboard = ({ getConstants }) => {
+  useEffect(() => {
+    getConstants();
+  }, [getConstants]);
+
   return (
     <div className="dashboard">
       <h1 className="my-1">Дашборд</h1>
@@ -121,6 +127,8 @@ const Dashboard = props => {
   );
 };
 
-Dashboard.propTypes = {};
+Dashboard.propTypes = {
+  getConstants: PropTypes.func.isRequired
+};
 
-export default Dashboard;
+export default connect(null, { getConstants })(Dashboard);

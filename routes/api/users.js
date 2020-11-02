@@ -13,6 +13,10 @@ router.get('/', ensureAuth, async (req, res) => {
   try {
     const users = await User.find().select('-password').sort({ secondName: 1 });
 
+    if (!users) {
+      return res.status(404).json({ msg: 'Пользователи не найдены' });
+    }
+
     return res.json(users);
   } catch (err) {
     console.error(err.message);

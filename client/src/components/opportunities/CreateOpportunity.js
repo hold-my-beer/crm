@@ -6,6 +6,7 @@ import { getCompanies } from '../../actions/company';
 import { getBrokers } from '../../actions/broker';
 import { getUsers } from '../../actions/user';
 import PropTypes from 'prop-types';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateOpportunity = ({
   addOpportunity,
@@ -15,6 +16,7 @@ const CreateOpportunity = ({
   company: { companies },
   broker: { brokers },
   user: { users },
+  constant: { constant },
   history
 }) => {
   const [formData, setFormData] = useState({
@@ -114,7 +116,7 @@ const CreateOpportunity = ({
       <p className="lead">Создайте новый тендер</p>
       <small>* поля, обязательные для заполнения</small>
       <form onSubmit={e => onSubmit(e)}>
-        <div className="parameters">
+        <div className="opportunity-parameters">
           <div className="form-group">
             <label htmlFor="company">Компания *</label>
             <input
@@ -229,20 +231,21 @@ const CreateOpportunity = ({
           <div className={className}>
             <div className="form-group">
               <label htmlFor="quoteType">Тип тендера</label>
-              <input
-                type="text"
+              <select
                 name="quoteType"
                 id="quoteType"
                 list="quoteTypes"
-                placeholder="Начните ввод..."
                 value={quoteType}
                 onChange={e => onChange(e)}
-              />
-              <datalist id="quoteTypes">
-                <option value="Реальный"></option>
-                <option value="Формальный"></option>
-                <option value="Пролонгация"></option>
-              </datalist>
+              >
+                <option />
+                {constant.QUOTE_TYPES &&
+                  constant.QUOTE_TYPES.map(quoteType => (
+                    <option key={uuidv4()} value={quoteType}>
+                      {quoteType}
+                    </option>
+                  ))}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="renewalDate">Дата пролонгации</label>
@@ -273,13 +276,15 @@ CreateOpportunity.propTypes = {
   getUsers: PropTypes.func.isRequired,
   company: PropTypes.object.isRequired,
   broker: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
+  constant: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
   company: state.company,
   broker: state.broker,
-  user: state.user
+  user: state.user,
+  constant: state.constant
 });
 
 export default connect(mapStateToProps, {

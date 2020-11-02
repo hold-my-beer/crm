@@ -10,6 +10,10 @@ router.get('/', ensureAuth, (req, res) => {
   try {
     const constants = config.get('constants');
 
+    if (!constants) {
+      return res.status(404).json({ msg: 'Константы не найдены' });
+    }
+
     res.json(constants);
   } catch (err) {
     console.error(err.message);

@@ -12,6 +12,10 @@ router.get('/', ensureAuth, async (req, res) => {
   try {
     const brokers = await Broker.find().sort({ name: 1 });
 
+    if (!brokers) {
+      return res.status(404).json({ msg: 'Брокеры не найдены' });
+    }
+
     return res.json(brokers);
   } catch (err) {
     console.error(err.message);

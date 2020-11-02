@@ -3,9 +3,9 @@ import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { login } from '../../actions/auth';
-import { getConstants } from '../../actions/constant';
+// import { getConstants } from '../../actions/constant';
 
-const Login = ({ login, getConstants, isAuthenticated }) => {
+const Login = ({ login, /*getConstants,*/ isAuthenticated }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -23,7 +23,7 @@ const Login = ({ login, getConstants, isAuthenticated }) => {
   };
 
   if (isAuthenticated) {
-    getConstants();
+    // getConstants();
     return <Redirect to="/dashboard" />;
   }
 
@@ -61,7 +61,7 @@ const Login = ({ login, getConstants, isAuthenticated }) => {
 
 Login.propTypes = {
   login: PropTypes.func.isRequired,
-  getConstants: PropTypes.func.isRequired,
+  // getConstants: PropTypes.func.isRequired,
   isAuthenticated: PropTypes.bool
 };
 
@@ -69,4 +69,4 @@ const mapStateToProps = state => ({
   isAuthenticated: state.auth.isAuthenticated
 });
 
-export default connect(mapStateToProps, { login, getConstants })(Login);
+export default connect(mapStateToProps, { login /*getConstants*/ })(Login);

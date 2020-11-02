@@ -130,8 +130,37 @@ router.get('/', ensureAuth, async (req, res) => {
       .populate('responsible', 'secondName')
       .sort({ createdAt: -1 });
 
+    if (!opportunities) {
+      return res.status(404).json({ msg: 'Тендеры не найдены' });
+    }
+
     return res.json(opportunities);
   } catch (err) {
+    console.log(err);
+    return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+  }
+});
+
+// @route   GET api/opportunities/:id
+// @desc    Get opportunity by id
+// @access  Private
+router.get('/:id', ensureAuth, async (req, res) => {
+  try {
+    const opportunity = await Opportunity.findById(req.params.id)
+      .populate('company', 'name')
+      .populate('broker', 'name')
+      .populate('responsible', 'secondName');
+
+    if (!opportunity) {
+      return res.status(404).json({ msg: 'Тендер не найден' });
+    }
+
+    return res.json(opportunity);
+  } catch (err) {
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Тендер не найден' });
+    }
+
     console.log(err);
     return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
   }
