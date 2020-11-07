@@ -1,32 +1,49 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { getOpportunityById } from '../../actions/opportunity';
+import {
+  getOpportunityById,
+  updateOpportunity,
+  removeOpportunity
+} from '../../actions/opportunity';
 import { getCompanies } from '../../actions/company';
 import { getBrokers } from '../../actions/broker';
 import { getReinsurers } from '../../actions/reinsurer';
 import { getUsers } from '../../actions/user';
+import { showDelete } from '../../actions/del';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import NumberFormat from 'react-number-format';
 
+// import DeleteModal from '../layout/DeleteModal';
 import Spinner from '../layout/Spinner';
 
 const EditOpportunity = ({
   getOpportunityById,
+  updateOpportunity,
+  removeOpportunity,
   getCompanies,
   getBrokers,
   getReinsurers,
   getUsers,
+  showDelete,
   company: { companies },
   broker: { brokers },
   user: { users },
   reinsurer: { reinsurers },
   opportunity: { opportunity, loading },
   constant: { constant },
-  match
+  confirmed,
+  match,
+  history
 }) => {
+  //   const [className, setClassName] = useState('delete-modal');
+
+  //   const onResetClassName = () => {
+  //     setClassName('delete-modal');
+  //   };
+
   const [formData, setFormData] = useState({
     company: '',
     companyId: '',
@@ -116,8 +133,8 @@ const EditOpportunity = ({
           ? moment(opportunity.deadlineDate).format('YYYY-MM-DD')
           : '',
       responsible:
-        opportunity && opportunity.responsible.secondName
-          ? opportunity.responsible.secondName
+        opportunity && opportunity.responsible._id
+          ? opportunity.responsible._id
           : '',
       status: opportunity && opportunity.status ? opportunity.status : '',
       sentDate:
@@ -144,6 +161,11 @@ const EditOpportunity = ({
         opportunity && opportunity.population ? opportunity.population : ''
     });
   }, [opportunity]);
+
+  useEffect(() => {
+    // console.log(confirmed);
+    confirmed && removeOpportunity(match.params.id, history);
+  }, [confirmed, removeOpportunity, match.params.id]);
 
   //   const onAddReinsurerChange = e => {
   //     if (reinsurerNames.indexOf(e.target.value) === -1) {
@@ -172,6 +194,13 @@ const EditOpportunity = ({
         }
         return '';
       }
+      case 'reinsurerNames': {
+        for (let i = 0; i < reinsurers.length; i++) {
+          if (reinsurers[i].name === val) {
+            return reinsurers[i]._id;
+          }
+        }
+      }
       default:
         return '';
     }
@@ -185,17 +214,28 @@ const EditOpportunity = ({
       ...formData,
       [name]:
         name !== 'reinsurerNames'
-          ? val
+          ? name === 'premium' || name === 'population'
+            ? parseInt(val.replace(/\s+/g, ''))
+            : val
           : e.target.checked
           ? [...reinsurerNames, val]
           : [...reinsurerNames.filter(item => item !== val)],
       companyId: name === 'company' ? getId('company', val) : companyId,
-      brokerId: name === 'broker' ? getId('broker', val) : brokerId
+      brokerId: name === 'broker' ? getId('broker', val) : brokerId,
+      reinsurerIds:
+        name === 'reinsurerNames'
+          ? e.target.checked
+            ? [...reinsurerIds, getId('reinsurerNames', val)]
+            : reinsurerIds.filter(
+                reinsurerId => reinsurerId !== getId('reinsurerNames', val)
+              )
+          : reinsurerIds
     });
   };
 
   const onSubmit = e => {
     e.preventDefault();
+    updateOpportunity(match.params.id, formData, history);
   };
 
   return (
@@ -203,234 +243,246 @@ const EditOpportunity = ({
       {loading || !opportunity ? (
         <Spinner />
       ) : (
-        <div className="edit-opportunity">
-          <h1 className="my-1">Редактировать тендер</h1>
-          <p className="lead">Измените данные по тендеру</p>
-          <Link to="/create-contracts" className="btn btn-round btn-primary">
-            Создать контракты <span className="plus">+</span>
-          </Link>
-          <p className="my-1">
-            <small>* поля, обязательные для заполнения</small>
-          </p>
-          <form onSubmit={e => onSubmit(e)}>
-            <div className="opportunity-parameters">
-              <div className="form-group">
-                <label htmlFor="company">Компания *</label>
+        <Fragment>
+          <div className="edit-opportunity">
+            <h1 className="my-1">Редактировать тендер</h1>
+            <p className="lead">Измените данные по тендеру</p>
+            <Link to="/create-contracts" className="btn btn-round btn-primary">
+              Создать контракты <span className="plus">+</span>
+            </Link>
+            <p className="my-1">
+              <small>* поля, обязательные для заполнения</small>
+            </p>
+            <form onSubmit={e => onSubmit(e)}>
+              <div className="opportunity-parameters">
+                <div className="form-group">
+                  <label htmlFor="company">Компания *</label>
 
-                <input
-                  type="text"
-                  name="company"
-                  id="company"
-                  list="companies"
-                  placeholder="Начните ввод..."
-                  autoComplete="off"
-                  value={company}
-                  onChange={e => onChange(e)}
-                />
+                  <input
+                    type="text"
+                    name="company"
+                    id="company"
+                    list="companies"
+                    placeholder="Начните ввод..."
+                    autoComplete="off"
+                    value={company}
+                    onChange={e => onChange(e)}
+                  />
 
-                <datalist id="companies">
-                  {companies &&
-                    companies.map(company => (
-                      <option key={company._id} value={company.name}></option>
+                  <datalist id="companies">
+                    {companies &&
+                      companies.map(company => (
+                        <option key={company._id} value={company.name}></option>
+                      ))}
+                  </datalist>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="broker">Брокер *</label>
+                  <input
+                    type="text"
+                    name="broker"
+                    id="broker"
+                    list="brokers"
+                    autoComplete="off"
+                    value={broker}
+                    onChange={e => {
+                      onChange(e);
+                      fillBrokerEmployees(e);
+                    }}
+                    placeholder="Начните ввод..."
+                  />
+                  <datalist id="brokers">
+                    {brokers &&
+                      brokers.map(broker => (
+                        <option key={broker._id} value={broker.name}></option>
+                      ))}
+                  </datalist>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="contactPerson">Контактное лицо *</label>
+                  <input
+                    type="text"
+                    name="contactPerson"
+                    id="contactPerson"
+                    list="contactPersons"
+                    autoComplete="off"
+                    value={contactPerson}
+                    onChange={e => onChange(e)}
+                    placeholder="Начните ввод..."
+                  />
+                  <datalist id="contactPersons">
+                    {brokerEmployees.map(employee => (
+                      <option key={employee._id} value={employee.name}></option>
                     ))}
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="broker">Брокер *</label>
-                <input
-                  type="text"
-                  name="broker"
-                  id="broker"
-                  list="brokers"
-                  autoComplete="off"
-                  value={broker}
-                  onChange={e => {
-                    onChange(e);
-                    fillBrokerEmployees(e);
-                  }}
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="brokers">
-                  {brokers &&
-                    brokers.map(broker => (
-                      <option key={broker._id} value={broker.name}></option>
-                    ))}
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="contactPerson">Контактное лицо *</label>
-                <input
-                  type="text"
-                  name="contactPerson"
-                  id="contactPerson"
-                  list="contactPersons"
-                  autoComplete="off"
-                  value={contactPerson}
-                  onChange={e => onChange(e)}
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="contactPersons">
-                  {brokerEmployees.map(employee => (
-                    <option key={employee._id} value={employee.name}></option>
-                  ))}
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="deadlineDate">Дедлайн *</label>
-                <input
-                  type="date"
-                  id="deadlineDate"
-                  name="deadlineDate"
-                  value={deadlineDate}
-                  onChange={e => onChange(e)}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="responsible">Ответственный *</label>
-                <select
-                  type="text"
-                  name="responsible"
-                  id="responsible"
-                  value={responsible}
-                  onChange={e => onChange(e)}
-                >
-                  {users &&
-                    users.length > 0 &&
-                    users.map(user => (
-                      <option key={user._id} value={user._id}>
-                        {user.secondName}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="status">Статус *</label>
-                <select
-                  type="text"
-                  name="status"
-                  id="status"
-                  value={status}
-                  onChange={e => onChange(e)}
-                >
-                  {constant.STATUSES &&
-                    constant.STATUSES.map(status => (
-                      <option key={uuidv4()} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="sentDate">Отправлено</label>
-                <input
-                  type="date"
-                  id="sentDate"
-                  name="sentDate"
-                  value={sentDate}
-                  onChange={e => onChange(e)}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="comment">Комментарий</label>
-                <textarea
-                  name="comment"
-                  id="comment"
-                  rows="5"
-                  value={comment}
-                  onChange={e => onChange(e)}
-                ></textarea>
-              </div>
+                  </datalist>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="deadlineDate">Дедлайн *</label>
+                  <input
+                    type="date"
+                    id="deadlineDate"
+                    name="deadlineDate"
+                    value={deadlineDate}
+                    onChange={e => onChange(e)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="responsible">Ответственный *</label>
+                  <select
+                    //   type="text"
+                    name="responsible"
+                    id="responsible"
+                    value={responsible}
+                    onChange={e => onChange(e)}
+                  >
+                    {users &&
+                      users.length > 0 &&
+                      users.map(user => (
+                        <option key={user._id} value={user._id}>
+                          {user.secondName}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="status">Статус *</label>
+                  <select
+                    type="text"
+                    name="status"
+                    id="status"
+                    value={status}
+                    onChange={e => onChange(e)}
+                  >
+                    {constant.STATUSES &&
+                      constant.STATUSES.map(status => (
+                        <option key={uuidv4()} value={status}>
+                          {status}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="sentDate">Отправлено</label>
+                  <input
+                    type="date"
+                    id="sentDate"
+                    name="sentDate"
+                    value={sentDate}
+                    onChange={e => onChange(e)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="comment">Комментарий</label>
+                  <textarea
+                    name="comment"
+                    id="comment"
+                    rows="5"
+                    value={comment}
+                    onChange={e => onChange(e)}
+                  ></textarea>
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="quoteType">Тип тендера</label>
-                <select
-                  type="text"
-                  name="quoteType"
-                  id="quoteType"
-                  value={quoteType}
-                  onChange={e => onChange(e)}
-                >
-                  {constant.QUOTE_TYPES &&
-                    constant.QUOTE_TYPES.map(quoteType => (
-                      <option key={uuidv4()} value={quoteType}>
-                        {quoteType}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label htmlFor="renewalDate">Дата пролонгации</label>
-                <input
-                  type="date"
-                  id="renewalDate"
-                  name="renewalDate"
-                  value={renewalDate}
-                  onChange={e => onChange(e)}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="reinsurerNames">Перестраховщики</label>
-                <ul id="reinsurerNames">
-                  {reinsurers &&
-                    reinsurers.map(reinsurer => (
-                      <li key={reinsurer._id}>
-                        <input
-                          type="checkbox"
-                          name="reinsurerNames"
-                          id={reinsurer.name}
-                          value={reinsurer.name}
-                          onChange={e => onChange(e)}
-                        />
-                        <label htmlFor={reinsurer.name}>{reinsurer.name}</label>
-                      </li>
-                    ))}
-                </ul>
-                {/* <label htmlFor="newReinsurer">+ Создать нового</label>
+                <div className="form-group">
+                  <label htmlFor="quoteType">Тип тендера</label>
+                  <select
+                    type="text"
+                    name="quoteType"
+                    id="quoteType"
+                    value={quoteType}
+                    onChange={e => onChange(e)}
+                  >
+                    {constant.QUOTE_TYPES &&
+                      constant.QUOTE_TYPES.map(quoteType => (
+                        <option key={uuidv4()} value={quoteType}>
+                          {quoteType}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="renewalDate">Дата пролонгации</label>
+                  <input
+                    type="date"
+                    id="renewalDate"
+                    name="renewalDate"
+                    value={renewalDate}
+                    onChange={e => onChange(e)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="reinsurerNames">Перестраховщики</label>
+                  <ul id="reinsurerNames">
+                    {reinsurers &&
+                      reinsurers.map(reinsurer => (
+                        <li key={reinsurer._id}>
+                          <input
+                            type="checkbox"
+                            name="reinsurerNames"
+                            id={reinsurer.name}
+                            value={reinsurer.name}
+                            onChange={e => onChange(e)}
+                          />
+                          <label htmlFor={reinsurer.name}>
+                            {reinsurer.name}
+                          </label>
+                        </li>
+                      ))}
+                  </ul>
+                  {/* <label htmlFor="newReinsurer">+ Создать нового</label>
                 <input
                   type="text"
                   id="newReinsurer"
                   name="newReinsurer"
                   onChange={e => onAddReinsurerChange(e)}
                 /> */}
+                </div>
+                <div className="form-group">
+                  <label htmlFor="premium">Премия, руб.</label>
+                  <NumberFormat
+                    //   type="number"
+                    thousandSeparator={' '}
+                    name="premium"
+                    id="premium"
+                    autoComplete="off"
+                    value={premium}
+                    onChange={e => onChange(e)}
+                    placeholder="Начните ввод..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="population">Численность</label>
+                  <NumberFormat
+                    //   type="number"
+                    thousandSeparator={' '}
+                    name="population"
+                    id="population"
+                    autoComplete="off"
+                    value={population}
+                    onChange={e => onChange(e)}
+                    placeholder="Начните ввод..."
+                  />
+                </div>
               </div>
-              <div className="form-group">
-                <label htmlFor="premium">Премия, руб.</label>
-                <NumberFormat
-                  //   type="number"
-                  thousandSeparator={' '}
-                  name="premium"
-                  id="premium"
-                  value={premium}
-                  onChange={e => onChange(e)}
-                  placeholder="Начните ввод..."
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="population">Численность</label>
-                <NumberFormat
-                  //   type="number"
-                  thousandSeparator={' '}
-                  name="population"
-                  id="population"
-                  value={population}
-                  onChange={e => onChange(e)}
-                  placeholder="Начните ввод..."
-                />
-              </div>
-            </div>
+              <input
+                type="submit"
+                className="btn btn-primary btn-block"
+                value="Изменить"
+              />
+            </form>
             <input
-              type="submit"
-              className="btn btn-primary btn-block"
-              value="Изменить"
+              type="button"
+              className="btn btn-danger btn-block"
+              value="Удалить"
+              //   onClick={e => setClassName('delete-modal show')}
+              onClick={e => showDelete('Тендер')}
             />
-          </form>
+          </div>
 
-          <input
-            type="button"
-            className="btn btn-danger btn-block"
-            value="Удалить"
-          />
-        </div>
+          {/* <DeleteModal
+            className={className}
+            onResetClassName={onResetClassName}
+          /> */}
+        </Fragment>
       )}
     </Fragment>
   );
@@ -438,16 +490,20 @@ const EditOpportunity = ({
 
 EditOpportunity.propTypes = {
   getOpportunityById: PropTypes.func.isRequired,
+  updateOpportunity: PropTypes.func.isRequired,
+  removeOpportunity: PropTypes.func.isRequired,
   getCompanies: PropTypes.func.isRequired,
   getBrokers: PropTypes.func.isRequired,
   getReinsurers: PropTypes.func.isRequired,
   getUsers: PropTypes.func.isRequired,
+  showDelete: PropTypes.func.isRequired,
   company: PropTypes.object.isRequired,
   broker: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
   reinsurer: PropTypes.object.isRequired,
   opportunity: PropTypes.object.isRequired,
-  constant: PropTypes.object.isRequired
+  constant: PropTypes.object.isRequired,
+  confirmed: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = state => ({
@@ -456,13 +512,17 @@ const mapStateToProps = state => ({
   broker: state.broker,
   user: state.user,
   reinsurer: state.reinsurer,
-  constant: state.constant
+  constant: state.constant,
+  confirmed: state.del.confirmed
 });
 
 export default connect(mapStateToProps, {
   getOpportunityById,
+  updateOpportunity,
+  removeOpportunity,
   getCompanies,
   getBrokers,
   getReinsurers,
-  getUsers
-})(EditOpportunity);
+  getUsers,
+  showDelete
+})(withRouter(EditOpportunity));

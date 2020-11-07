@@ -110,6 +110,16 @@ const CreateOpportunity = ({
     getUsers();
   }, [getCompanies, getBrokers, getUsers]);
 
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      quoteType:
+        constant.QUOTE_TYPES &&
+        constant.QUOTE_TYPES.length !== 0 &&
+        constant.QUOTE_TYPES[0]
+    });
+  }, [constant]);
+
   return (
     <div className="create-opportunity">
       <h1 className="my-1">Создать тендер</h1>
@@ -238,7 +248,6 @@ const CreateOpportunity = ({
                 value={quoteType}
                 onChange={e => onChange(e)}
               >
-                <option />
                 {constant.QUOTE_TYPES &&
                   constant.QUOTE_TYPES.map(quoteType => (
                     <option key={uuidv4()} value={quoteType}>

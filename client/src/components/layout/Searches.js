@@ -8,6 +8,8 @@ const Searches = ({
   constant,
   searchValue,
   onSearchValueChange,
+  initialSearchParameters,
+  onSearchParametersReset,
   searchParameters,
   onAdvancedValueChange,
   onAdvancedValuesSubmit,
@@ -35,6 +37,8 @@ const Searches = ({
         constant={constant}
         className={className}
         onClassChange={onClassChange}
+        initialSearchParameters={initialSearchParameters}
+        onSearchParametersReset={onSearchParametersReset}
         searchParameters={searchParameters}
         onAdvancedValueChange={onAdvancedValueChange}
         onAdvancedValuesSubmit={onAdvancedValuesSubmit}
@@ -52,6 +56,8 @@ Searches.propTypes = {
   constant: PropTypes.object.isRequired,
   searchValue: PropTypes.string.isRequired,
   onSearchValueChange: PropTypes.func.isRequired,
+  initialSearchParameters: PropTypes.object.isRequired,
+  onSearchParametersReset: PropTypes.func.isRequired,
   searchParameters: PropTypes.object.isRequired,
   onAdvancedValueChange: PropTypes.func.isRequired,
   onAdvancedValuesSubmit: PropTypes.func.isRequired,

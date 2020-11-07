@@ -9,6 +9,7 @@ import Alert from '../layout/Alert';
 import Opportunities from '../opportunities/Opportunities';
 import CreateOpportunity from '../opportunities/CreateOpportunity';
 import EditOpportunity from '../opportunities/EditOpportunity';
+import DeleteModal from '../layout/DeleteModal';
 
 const Routes = () => {
   return (
@@ -37,6 +38,7 @@ const Routes = () => {
           />
         </Switch>
       </div>
+      <PrivateRoute component={DeleteModal} />
     </Fragment>
   );
 };

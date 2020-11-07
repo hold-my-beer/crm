@@ -2,7 +2,13 @@
   "MongoURI": "mongodb+srv://sergei123:sergei123@crm-mern.zcfkr.mongodb.net/crm_mern?retryWrites=true&w=majority",
   "jwtSecret": "secretsecret",
   "constants": {
-    "QUOTE_TYPES": ["Реальный", "Формальный", "Пролонгация", "Расширение"],
+    "QUOTE_TYPES": [
+      "Не определен",
+      "Реальный",
+      "Формальный",
+      "Пролонгация",
+      "Расширение"
+    ],
     "SORT_OPPORTUNITIES_BY": [
       "Новые",
       "Ближайший дедлайн",

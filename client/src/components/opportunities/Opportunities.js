@@ -7,6 +7,7 @@ import { getUsers } from '../../actions/user';
 import { getReinsurers } from '../../actions/reinsurer';
 import PropTypes from 'prop-types';
 import Moment from 'react-moment';
+import NumberFormat from 'react-number-format';
 
 import Searches from '../layout/Searches';
 import Sort from '../layout/Sort';
@@ -180,23 +181,133 @@ const Opportunities = ({
       opportunity =>
         brokerNames.indexOf(opportunity.broker.name) !== -1 &&
         contactPersonNames.indexOf(opportunity.contactPerson) !== -1 &&
-        Date.parse(deadlineFrom) <= Date.parse(opportunity.deadlineDate) &&
-        Date.parse(deadlineTo) >= Date.parse(opportunity.deadlineDate) &&
+        ((deadlineFrom &&
+          Date.parse(deadlineFrom) <= Date.parse(opportunity.deadlineDate)) ||
+          !deadlineFrom) &&
+        ((deadlineTo &&
+          Date.parse(deadlineTo) >= Date.parse(opportunity.deadlineDate)) ||
+          !deadlineTo) &&
         responsibleNames.indexOf(opportunity.responsible.secondName) !== -1 &&
-        statuses.indexOf(opportunity.status) !== -1
-      //  Date.parse(sentDateFrom) <= Date.parse(opportunity.sentDate) &&
-      // sentDateTo >= opportunity.sentDate &&
-      // quoteTypes.indexOf(opportunity.quoteType) !== -1 &&
-      // renewalDateFrom <= opportunity.renewalDate &&
-      // renewalDateTo >= opportunity.renewalDate &&
-      // opportunity.reinsurers.filter(
-      //   reinsurer => reinsurers.indexOf(reinsurer.name) !== -1
-      // ).length !== 0 &&
-      // premiumFrom <= opportunity.premium &&
-      // premiumTo >= opportunity.premium &&
-      // populationFrom <= opportunity.population &&
-      // populationTo >= opportunity.population
+        statuses.indexOf(opportunity.status) !== -1 &&
+        ((sentDateFrom &&
+          Date.parse(sentDateFrom) <= Date.parse(opportunity.sentDate)) ||
+          !sentDateFrom) &&
+        ((sentDateTo &&
+          Date.parse(sentDateTo) >= Date.parse(opportunity.sentDate)) ||
+          !sentDateTo) &&
+        quoteTypes.indexOf(opportunity.quoteType) !== -1 &&
+        ((renewalDateFrom &&
+          Date.parse(renewalDateFrom) <= Date.parse(opportunity.renewalDate)) ||
+          !renewalDateFrom) &&
+        ((renewalDateTo &&
+          Date.parse(renewalDateTo) >= Date.parse(opportunity.renewalDate)) ||
+          !renewalDateTo) &&
+        (reinsurers.length === reinsurerNames.length ||
+          (reinsurerNames.length === 0 &&
+            opportunity.reinsurers.length === 0) ||
+          opportunity.reinsurers.filter(
+            reinsurer => reinsurerNames.indexOf(reinsurer.name) !== -1
+          ).length !== 0) &&
+        parseInt(premiumFrom.replace(/\s+/g, '')) <= opportunity.premium &&
+        parseInt(premiumTo.replace(/\s+/g, '')) >= opportunity.premium &&
+        parseInt(populationFrom.replace(/\s+/g, '')) <=
+          opportunity.population &&
+        parseInt(populationTo.replace(/\s+/g, '')) >= opportunity.population
     );
+
+    setDisplayedOpportunities(newDisplayedOpportunities);
+  };
+
+  const onSearchParametersReset = () => {
+    setSearchParameters(initialSearchParameters);
+    setToggleAny({
+      anyBrokers: true,
+      anyContactPersons: true,
+      anyDeadlineFrom: true,
+      anyDeadlineTo: true,
+      anyResponsibles: true,
+      anyStatuses: true,
+      anySentDateFrom: true,
+      anySentDateTo: true,
+      anyQuoteTypes: true,
+      anyRenewalDateFrom: true,
+      anyRenewalDateTo: true,
+      anyReinsurers: true,
+      anyPremiumFrom: true,
+      anyPremiumTo: true,
+      anyPopulationFrom: true,
+      anyPopulationTo: true
+    });
+  };
+
+  // const [sortBy, setSortBy] = useState(
+  //   constant.SORT_OPPORTUNITIES_BY &&
+  //     constant.SORT_OPPORTUNITIES_BY.length !== 0
+  //     ? constant.SORT_OPPORTUNITIES_BY[0]
+  //     : 'Новые'
+  // );
+
+  // const onSortByChange = e => {
+  //   setSortBy(e.target.value);
+  // };
+
+  const onSortByChange = e => {
+    let newDisplayedOpportunities = [];
+
+    switch (e.target.value) {
+      case 'Новые':
+        // setDisplayedOpportunities(
+        //   displayedOpportunities.sort(
+        //     (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt)
+        //   )
+        // );
+        newDisplayedOpportunities = [...displayedOpportunities].sort(
+          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+        );
+        break;
+      case 'Ближайший дедлайн':
+        // console.log('in deadline');
+        // setDisplayedOpportunities(
+        //   displayedOpportunities.sort(
+        //     (a, b) => Date.parse(a.deadlineDate) - Date.parse(b.deadlineDate)
+        //   )
+        // );
+        newDisplayedOpportunities = [...displayedOpportunities].sort(
+          (a, b) => Date.parse(a.deadlineDate) - Date.parse(b.deadlineDate)
+        );
+        break;
+      case 'Ближайшая пролонгация':
+        // setDisplayedOpportunities(
+        //   displayedOpportunities.sort(
+        //     (a, b) => Date.parse(a.renewalDate) - Date.parse(b.renewalDate)
+        //   )
+        // );
+        newDisplayedOpportunities = [...displayedOpportunities].sort((a, b) =>
+          !a.renewalDate
+            ? 1
+            : !b.renewaldate
+            ? -1
+            : b.renewalDate - a.renewalDate
+        );
+
+        break;
+      case 'Большая сумма премии':
+        // setDisplayedOpportunities(
+        //   displayedOpportunities.sort(
+        //     (a, b) => parseInt(a.premium) - parseInt(b.premium)
+        //   )
+        // );
+        newDisplayedOpportunities = [...displayedOpportunities].sort((a, b) =>
+          !a.premium
+            ? 1
+            : !b.premium
+            ? -1
+            : parseInt(b.premium) - parseInt(a.premium)
+        );
+        break;
+      default:
+        return;
+    }
 
     setDisplayedOpportunities(newDisplayedOpportunities);
   };
@@ -223,15 +334,15 @@ const Opportunities = ({
         : brokers
             .map(broker => broker.employees.map(employee => employee.name))
             .flat(),
-      deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       responsibleNames: !users ? [] : users.map(user => user.secondName),
       statuses: !constant ? [] : constant.STATUSES,
-      sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       quoteTypes: !constant ? [] : constant.QUOTE_TYPES,
-      renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       reinsurerNames: !reinsurers
         ? []
         : reinsurers.map(reinsurer => reinsurer.name),
@@ -250,15 +361,15 @@ const Opportunities = ({
         : brokers
             .map(broker => broker.employees.map(employee => employee.name))
             .flat(),
-      deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       responsibleNames: !users ? [] : users.map(user => user.secondName),
       statuses: !constant ? [] : constant.STATUSES,
-      sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       quoteTypes: !constant ? [] : constant.QUOTE_TYPES,
-      renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
+      // renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
+      // renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
       reinsurerNames: !reinsurers
         ? []
         : reinsurers.map(reinsurer => reinsurer.name),
@@ -281,6 +392,8 @@ const Opportunities = ({
         constant={constant}
         searchValue={searchValue}
         onSearchValueChange={onSearchValueChange}
+        initialSearchParameters={initialSearchParameters}
+        onSearchParametersReset={onSearchParametersReset}
         searchParameters={searchParameters}
         onAdvancedValueChange={onAdvancedValueChange}
         onAdvancedValuesSubmit={onAdvancedValuesSubmit}
@@ -290,7 +403,11 @@ const Opportunities = ({
         users={users}
         reinsurers={reinsurers}
       />
-      <Sort />
+      <Sort
+        constant={constant}
+        displayedOpportunities={displayedOpportunities}
+        onSortByChange={onSortByChange}
+      />
 
       {loading ? (
         <Spinner />
@@ -352,8 +469,24 @@ const Opportunities = ({
                         reinsurer => reinsurer && `${reinsurer.name} `
                       )}
                   </td>
-                  <td className="text-right">{opportunity.premium}</td>
-                  <td className="text-right">{opportunity.population}</td>
+                  <td className="text-right">
+                    {opportunity.premium && (
+                      <NumberFormat
+                        displayType="text"
+                        thousandSeparator={' '}
+                        value={opportunity.premium}
+                      />
+                    )}
+                  </td>
+                  <td className="text-right">
+                    {opportunity.population && (
+                      <NumberFormat
+                        displayType="text"
+                        thousandSeparator={' '}
+                        value={opportunity.population}
+                      />
+                    )}
+                  </td>
                   <td className="commentary">{opportunity.comment}</td>
                 </tr>
               ))}

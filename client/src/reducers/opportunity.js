@@ -2,6 +2,8 @@ import {
   GET_OPPORTUNITIES,
   GET_OPPORTUNITY,
   ADD_OPPORTUNITY,
+  UPDATE_OPPORTUNITY,
+  DELETE_OPPORTUNITY,
   SET_OPPORTUNITY_LOADING,
   OPPORTUNITY_ERROR
 } from '../actions/types';
@@ -30,9 +32,16 @@ export default function (state = initialState, action) {
         loading: false
       };
     case ADD_OPPORTUNITY:
+    case UPDATE_OPPORTUNITY:
       return {
         ...state,
         opportunity: payload,
+        loading: false
+      };
+    case DELETE_OPPORTUNITY:
+      return {
+        ...state,
+        opportunity: null,
         loading: false
       };
     case SET_OPPORTUNITY_LOADING:

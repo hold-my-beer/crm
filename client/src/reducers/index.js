@@ -7,6 +7,7 @@ import company from './company';
 import broker from './broker';
 import reinsurer from './reinsurer';
 import user from './user';
+import del from './del';
 
 export default combineReducers({
   auth,
@@ -16,5 +17,6 @@ export default combineReducers({
   company,
   broker,
   reinsurer,
-  user
+  user,
+  del
 });

@@ -6,6 +6,8 @@ import NumberFormat from 'react-number-format';
 const AdvancedSearch = ({
   className,
   onClassChange,
+  initialSearchParameters,
+  onSearchParametersReset,
   searchParameters,
   onAdvancedValueChange,
   onAdvancedValuesSubmit,
@@ -56,13 +58,24 @@ const AdvancedSearch = ({
 
   return (
     <div className={className}>
-      <div className="close-search-button-area">
-        <div
-          className="close-search-button"
-          onClick={e => onClassChange('advanced-search')}
-        >
-          <div className="close-search-button-item"></div>
-          <div className="close-search-button-item"></div>
+      <div className="advanced-search-top">
+        <div className="advanced-search-top-left"></div>
+        <div className="reset-parameters-area">
+          <input
+            type="button"
+            className="btn btn-primary btn-block"
+            value="Сбросить параметры"
+            onClick={e => onSearchParametersReset()}
+          />
+        </div>
+        <div className="close-search-button-area">
+          <div
+            className="close-search-button"
+            onClick={e => onClassChange('advanced-search')}
+          >
+            <div className="close-search-button-item"></div>
+            <div className="close-search-button-item"></div>
+          </div>
         </div>
       </div>
 
@@ -175,7 +188,7 @@ const AdvancedSearch = ({
               type="date"
               id="deadlineFrom"
               name="deadlineFrom"
-              value={deadlineFrom}
+              value={deadlineFrom ? deadlineFrom : ''}
               onChange={e => onAdvancedValueChange(e, 'anyDeadlineFrom')}
               disabled={anyDeadlineFrom}
             />
@@ -197,7 +210,7 @@ const AdvancedSearch = ({
               type="date"
               id="deadlineTo"
               name="deadlineTo"
-              value={deadlineTo}
+              value={deadlineTo ? deadlineTo : ''}
               onChange={e => onAdvancedValueChange(e, 'anyDeadlineTo')}
               disabled={anyDeadlineTo}
             />
@@ -307,7 +320,7 @@ const AdvancedSearch = ({
               type="date"
               id="sentDateFrom"
               name="sentDateFrom"
-              value={sentDateFrom}
+              value={sentDateFrom ? sentDateFrom : ''}
               onChange={e => onAdvancedValueChange(e, 'anySentDateFrom')}
               disabled={anySentDateFrom}
             />
@@ -329,7 +342,7 @@ const AdvancedSearch = ({
               type="date"
               id="sentDateTo"
               name="sentDateTo"
-              value={sentDateTo}
+              value={sentDateTo ? sentDateTo : ''}
               onChange={e => onAdvancedValueChange(e, 'anySentDateTo')}
               disabled={anySentDateTo}
             />
@@ -400,7 +413,7 @@ const AdvancedSearch = ({
               type="date"
               id="renewalDateFrom"
               name="renewalDateFrom"
-              value={renewalDateFrom}
+              value={renewalDateFrom ? renewalDateFrom : ''}
               onChange={e => onAdvancedValueChange(e, 'anyRenewalDateFrom')}
               disabled={anyRenewalDateFrom}
             />
@@ -423,7 +436,7 @@ const AdvancedSearch = ({
               type="date"
               id="renewalDateTo"
               name="renewalDateTo"
-              value={renewalDateTo}
+              value={renewalDateTo ? renewalDateTo : ''}
               onChange={e => onAdvancedValueChange(e, 'anyRenewalDateTo')}
               disabled={anyRenewalDateTo}
             />
@@ -577,16 +590,19 @@ const AdvancedSearch = ({
             />
           </div>
         </div>
-
-        <input
-          type="button"
-          className="btn btn-primary btn-block"
-          value="Найти"
-          onClick={e => {
-            onAdvancedValuesSubmit();
-            onClassChange('advanced-search');
-          }}
-        />
+      </div>
+      <div className="advanced-search-bottom">
+        <div className="submit-search-area">
+          <input
+            type="button"
+            className="btn btn-primary btn-block"
+            value="Найти"
+            onClick={e => {
+              onAdvancedValuesSubmit();
+              onClassChange('advanced-search');
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -596,6 +612,8 @@ AdvancedSearch.propTypes = {
   constant: PropTypes.object.isRequired,
   className: PropTypes.string.isRequired,
   onClassChange: PropTypes.func.isRequired,
+  initialSearchParameters: PropTypes.object.isRequired,
+  onSearchParametersReset: PropTypes.func.isRequired,
   searchParameters: PropTypes.object.isRequired,
   onAdvancedValueChange: PropTypes.func.isRequired,
   onAdvancedValuesSubmit: PropTypes.func.isRequired,
