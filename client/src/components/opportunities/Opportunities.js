@@ -25,11 +25,18 @@ const Opportunities = ({
   reinsurer: { reinsurers },
   opportunity: { opportunities, loading }
 }) => {
-  const [searchValue, setSearchValue] = useState('');
+  const [filteredOpportunities, setFilteredOpportunities] = useState([]);
 
-  const [displayedOpportunities, setDisplayedOpportunities] = useState(
-    opportunities
-  );
+  const [sortedOpportunities, setSortedOpportunities] = useState([]);
+
+  const [displayedOpportunities, setDisplayedOpportunities] = useState([]);
+
+  // const [displayedOpportunities, setDisplayedOpportunities] = useState(
+  //   opportunities
+  // );
+
+  /* Search */
+  const [searchValue, setSearchValue] = useState('');
 
   const hasSubstring = (str, substr) => {
     return str.toLowerCase().indexOf(substr.toLowerCase()) !== -1;
@@ -67,6 +74,7 @@ const Opportunities = ({
     setDisplayedOpportunities(newDisplayedOpportunnities);
   };
 
+  /* Advanced Search */
   const [searchParameters, setSearchParameters] = useState({
     brokerNames: [],
     contactPersonNames: [],
@@ -240,17 +248,7 @@ const Opportunities = ({
     });
   };
 
-  // const [sortBy, setSortBy] = useState(
-  //   constant.SORT_OPPORTUNITIES_BY &&
-  //     constant.SORT_OPPORTUNITIES_BY.length !== 0
-  //     ? constant.SORT_OPPORTUNITIES_BY[0]
-  //     : 'Новые'
-  // );
-
-  // const onSortByChange = e => {
-  //   setSortBy(e.target.value);
-  // };
-
+  /* Sort */
   const onSortByChange = e => {
     let newDisplayedOpportunities = [];
 
@@ -312,11 +310,22 @@ const Opportunities = ({
     setDisplayedOpportunities(newDisplayedOpportunities);
   };
 
+  /* Pagination */
+  const onPageParamsChange = newDisplayedOpportunities => {
+    setDisplayedOpportunities(newDisplayedOpportunities);
+  };
+
   useEffect(() => {
     getOpportunities();
   }, [getOpportunities]);
 
+  // useEffect(() => {
+  //   setDisplayedOpportunities(opportunities.length === 0 ? [] : opportunities);
+  // }, [opportunities]);
+
   useEffect(() => {
+    setFilteredOpportunities(opportunities.length === 0 ? [] : opportunities);
+    setSortedOpportunities(opportunities.length === 0 ? [] : opportunities);
     setDisplayedOpportunities(opportunities.length === 0 ? [] : opportunities);
   }, [opportunities]);
 
@@ -495,7 +504,13 @@ const Opportunities = ({
         </div>
       )}
 
-      <Pagination />
+      {/* {displayedOpportunities.length !== 0 && ( */}
+      <Pagination
+        sortedRows={sortedOpportunities}
+        displayedRows={displayedOpportunities}
+        onPageParamsChange={onPageParamsChange}
+      />
+      {/* )} */}
     </div>
   );
 };

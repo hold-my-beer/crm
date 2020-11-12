@@ -24,10 +24,6 @@ const Sort = ({ constant, displayedOpportunities, onSortByChange }) => {
               {sortOption}
             </option>
           ))}
-        {/* <option value="0">Новые</option>
-        <option value="1">Ближайший дедлайн</option>
-        <option value="2">Ближайшая пролонгация</option>
-        <option value="3">Большая сумма премии</option> */}
       </select>
     </div>
   );

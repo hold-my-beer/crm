@@ -227,6 +227,11 @@ img {
   opacity: 0.8;
 }
 
+.btn:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
 /* Forms */
 form {
   width: 100%;
@@ -375,6 +380,11 @@ td.sticky-column {
 }
 .pagination-group .btn {
   margin-top: 0;
+}
+
+.currentPage {
+  padding: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 /* Navbar */

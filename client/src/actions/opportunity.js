@@ -139,7 +139,7 @@ export const removeOpportunity = (id, history) => async dispatch => {
   dispatch(setOpportunityLoading());
 
   try {
-    const res = await axios.delete(`/api/opportunities/${id}`);
+    await axios.delete(`/api/opportunities/${id}`);
 
     dispatch({
       type: RESET_DELETE

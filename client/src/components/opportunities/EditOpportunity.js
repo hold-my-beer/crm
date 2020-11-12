@@ -200,6 +200,7 @@ const EditOpportunity = ({
             return reinsurers[i]._id;
           }
         }
+        break;
       }
       default:
         return '';
