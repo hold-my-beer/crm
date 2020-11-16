@@ -2,32 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { getOpportunities } from '../../actions/opportunity';
-import { getBrokers } from '../../actions/broker';
-import { getUsers } from '../../actions/user';
-import { getReinsurers } from '../../actions/reinsurer';
 import hasSubstring from '../../utils/hasSubstring';
 import PropTypes from 'prop-types';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 
 import Search from '../layout/Search';
-import AdvancedSearch from '../layout/AdvancedSearch';
+import FilterOpportunities from './FilterOpportunities';
 import Sort from '../layout/Sort';
 import Pagination from '../layout/Pagination';
 import Spinner from '../layout/Spinner';
 
 const Opportunities = ({
   getOpportunities,
-  getBrokers,
-  getUsers,
-  getReinsurers,
   constant: { constant },
-  broker: { brokers },
-  user: { users },
-  reinsurer: { reinsurers },
   opportunity: { opportunities, loading }
 }) => {
-  const [className, setClassName] = useState('advanced-search');
+  const [className, setClassName] = useState('filter');
 
   const [filteredOpportunities, setFilteredOpportunities] = useState([]);
 
@@ -76,178 +67,9 @@ const Opportunities = ({
     return newFilteredOpportunities;
   };
 
-  /* Advanced Search */
-  const [searchParameters, setSearchParameters] = useState({
-    brokerNames: [],
-    contactPersonNames: [],
-    deadlineFrom: '',
-    deadlineTo: '',
-    responsibleNames: [],
-    statuses: [],
-    sentDateFrom: '',
-    sentDateTo: '',
-    quoteTypes: [],
-    renewalDateFrom: '',
-    renewalDateTo: '',
-    reinsurerNames: [],
-    premiumFrom: '',
-    premiumTo: '',
-    populationFrom: '',
-    populationTo: ''
-  });
-
-  const {
-    brokerNames,
-    contactPersonNames,
-    deadlineFrom,
-    deadlineTo,
-    responsibleNames,
-    statuses,
-    sentDateFrom,
-    sentDateTo,
-    quoteTypes,
-    renewalDateFrom,
-    renewalDateTo,
-    reinsurerNames,
-    premiumFrom,
-    premiumTo,
-    populationFrom,
-    populationTo
-  } = searchParameters;
-
-  const [initialSearchParameters, setInitialSearchParameters] = useState({
-    brokerNames: [],
-    contactPersonNames: [],
-    deadlineFrom: '',
-    deadlineTo: '',
-    responsibleNames: [],
-    statuses: [],
-    sentDateFrom: '',
-    sentDateTo: '',
-    quoteTypes: [],
-    renewalDateFrom: '',
-    renewalDateTo: '',
-    reinsurerNames: [],
-    premiumFrom: '',
-    premiumTo: '',
-    populationFrom: '',
-    populationTo: ''
-  });
-
-  const onAdvancedValueChange = (e, nameOfAny = null) => {
-    setSearchParameters({
-      ...searchParameters,
-      [e.target.name]:
-        e.target.getAttribute('type') === 'checkbox'
-          ? e.target.checked
-            ? [...searchParameters[e.target.name], e.target.value]
-            : [
-                ...searchParameters[e.target.name].filter(
-                  item => item !== e.target.value
-                )
-              ]
-          : e.target.value
-    });
-
-    setToggleAny(
-      e.target.checked ? { ...toggleAny } : { ...toggleAny, [nameOfAny]: false }
-    );
-  };
-
-  const [toggleAny, setToggleAny] = useState({
-    anyBrokers: true,
-    anyContactPersons: true,
-    anyDeadlineFrom: true,
-    anyDeadlineTo: true,
-    anyResponsibles: true,
-    anyStatuses: true,
-    anySentDateFrom: true,
-    anySentDateTo: true,
-    anyQuoteTypes: true,
-    anyRenewalDateFrom: true,
-    anyRenewalDateTo: true,
-    anyReinsurers: true,
-    anyPremiumFrom: true,
-    anyPremiumTo: true,
-    anyPopulationFrom: true,
-    anyPopulationTo: true
-  });
-
-  const onToggleAny = (e, searchParameterName) => {
-    setToggleAny({ ...toggleAny, [e.target.name]: e.target.checked });
-
-    setSearchParameters({
-      ...searchParameters,
-      [searchParameterName]: e.target.checked
-        ? initialSearchParameters[searchParameterName]
-        : Array.isArray(searchParameters[searchParameterName])
-        ? []
-        : initialSearchParameters[searchParameterName]
-    });
-  };
-
-  const onAdvancedValuesSubmit = () => {
-    const newDisplayedOpportunities = opportunities.filter(
-      opportunity =>
-        brokerNames.indexOf(opportunity.broker.name) !== -1 &&
-        contactPersonNames.indexOf(opportunity.contactPerson) !== -1 &&
-        ((deadlineFrom &&
-          Date.parse(deadlineFrom) <= Date.parse(opportunity.deadlineDate)) ||
-          !deadlineFrom) &&
-        ((deadlineTo &&
-          Date.parse(deadlineTo) >= Date.parse(opportunity.deadlineDate)) ||
-          !deadlineTo) &&
-        responsibleNames.indexOf(opportunity.responsible.secondName) !== -1 &&
-        statuses.indexOf(opportunity.status) !== -1 &&
-        ((sentDateFrom &&
-          Date.parse(sentDateFrom) <= Date.parse(opportunity.sentDate)) ||
-          !sentDateFrom) &&
-        ((sentDateTo &&
-          Date.parse(sentDateTo) >= Date.parse(opportunity.sentDate)) ||
-          !sentDateTo) &&
-        quoteTypes.indexOf(opportunity.quoteType) !== -1 &&
-        ((renewalDateFrom &&
-          Date.parse(renewalDateFrom) <= Date.parse(opportunity.renewalDate)) ||
-          !renewalDateFrom) &&
-        ((renewalDateTo &&
-          Date.parse(renewalDateTo) >= Date.parse(opportunity.renewalDate)) ||
-          !renewalDateTo) &&
-        (reinsurers.length === reinsurerNames.length ||
-          (reinsurerNames.length === 0 &&
-            opportunity.reinsurers.length === 0) ||
-          opportunity.reinsurers.filter(
-            reinsurer => reinsurerNames.indexOf(reinsurer.name) !== -1
-          ).length !== 0) &&
-        parseInt(premiumFrom.replace(/\s+/g, '')) <= opportunity.premium &&
-        parseInt(premiumTo.replace(/\s+/g, '')) >= opportunity.premium &&
-        parseInt(populationFrom.replace(/\s+/g, '')) <=
-          opportunity.population &&
-        parseInt(populationTo.replace(/\s+/g, '')) >= opportunity.population
-    );
-
-    setDisplayedOpportunities(newDisplayedOpportunities);
-  };
-
-  const onSearchParametersReset = () => {
-    setSearchParameters(initialSearchParameters);
-    setToggleAny({
-      anyBrokers: true,
-      anyContactPersons: true,
-      anyDeadlineFrom: true,
-      anyDeadlineTo: true,
-      anyResponsibles: true,
-      anyStatuses: true,
-      anySentDateFrom: true,
-      anySentDateTo: true,
-      anyQuoteTypes: true,
-      anyRenewalDateFrom: true,
-      anyRenewalDateTo: true,
-      anyReinsurers: true,
-      anyPremiumFrom: true,
-      anyPremiumTo: true,
-      anyPopulationFrom: true,
-      anyPopulationTo: true
-    });
+  /* Filter opportunities */
+  const onFilterSubmit = newFilteredOpportunities => {
+    setFilteredOpportunities(newFilteredOpportunities);
   };
 
   /* Sort */
@@ -270,66 +92,6 @@ const Opportunities = ({
     setDisplayedOpportunities(opportunities.length === 0 ? [] : opportunities);
   }, [opportunities]);
 
-  useEffect(() => {
-    getBrokers();
-    getUsers();
-    getReinsurers();
-  }, [getBrokers, getUsers, getReinsurers]);
-
-  useEffect(() => {
-    setSearchParameters({
-      brokerNames: !brokers ? [] : brokers.map(broker => broker.name),
-      contactPersonNames: !brokers
-        ? []
-        : brokers
-            .map(broker => broker.employees.map(employee => employee.name))
-            .flat(),
-      // deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      responsibleNames: !users ? [] : users.map(user => user.secondName),
-      statuses: !constant ? [] : constant.STATUSES,
-      // sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      quoteTypes: !constant ? [] : constant.QUOTE_TYPES,
-      // renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      reinsurerNames: !reinsurers
-        ? []
-        : reinsurers.map(reinsurer => reinsurer.name),
-      premiumFrom: !constant ? 0 : constant.SUM_MIN,
-      premiumTo: !constant ? 1000000000 : constant.SUM_MAX,
-      populationFrom: !constant ? 0 : constant.QUANTITY_MIN,
-      populationTo: !constant ? 1000000 : constant.QUANTITY_MAX
-    });
-  }, [constant, brokers, users, reinsurers]);
-
-  useEffect(() => {
-    setInitialSearchParameters({
-      brokerNames: !brokers ? [] : brokers.map(broker => broker.name),
-      contactPersonNames: !brokers
-        ? []
-        : brokers
-            .map(broker => broker.employees.map(employee => employee.name))
-            .flat(),
-      // deadlineFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // deadlineTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      responsibleNames: !users ? [] : users.map(user => user.secondName),
-      statuses: !constant ? [] : constant.STATUSES,
-      // sentDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // sentDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      quoteTypes: !constant ? [] : constant.QUOTE_TYPES,
-      // renewalDateFrom: !constant ? '2000-01-01' : constant.MIN_DATE,
-      // renewalDateTo: !constant ? '2099-12-31' : constant.MAX_DATE,
-      reinsurerNames: !reinsurers
-        ? []
-        : reinsurers.map(reinsurer => reinsurer.name),
-      premiumFrom: !constant ? 0 : constant.SUM_MIN,
-      premiumTo: !constant ? 1000000000 : constant.SUM_MAX,
-      populationFrom: !constant ? 0 : constant.QUANTITY_MIN,
-      populationTo: !constant ? 1000000 : constant.QUANTITY_MAX
-    });
-  }, [constant, brokers, users, reinsurers]);
-
   return (
     <div className="opportunities">
       <h1 className="my-1">Тендеры</h1>
@@ -345,24 +107,15 @@ const Opportunities = ({
         filteredRows={filteredOpportunities}
         onSearchChange={onSearchChange}
         filterRows={filterOpportunities}
-        // searchValue={searchValue}
-        // onSearchValueChange={onSearchValueChange}
       />
 
-      <AdvancedSearch
-        constant={constant}
+      <FilterOpportunities
         className={className}
         onClassChange={onClassChange}
-        initialSearchParameters={initialSearchParameters}
-        onSearchParametersReset={onSearchParametersReset}
-        searchParameters={searchParameters}
-        onAdvancedValueChange={onAdvancedValueChange}
-        onAdvancedValuesSubmit={onAdvancedValuesSubmit}
-        toggleAny={toggleAny}
-        onToggleAny={onToggleAny}
-        brokers={brokers}
-        users={users}
-        reinsurers={reinsurers}
+        opportunities={opportunities}
+        filteredOpportunities={filteredOpportunities}
+        onFilterSubmit={onFilterSubmit}
+        constant={constant}
       />
 
       <Sort
@@ -469,27 +222,15 @@ const Opportunities = ({
 
 Opportunities.propTypes = {
   getOpportunities: PropTypes.func.isRequired,
-  getBrokers: PropTypes.func.isRequired,
-  getUsers: PropTypes.func.isRequired,
-  getReinsurers: PropTypes.func.isRequired,
   constant: PropTypes.object.isRequired,
-  broker: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
-  reinsurer: PropTypes.object.isRequired,
   opportunity: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
   constant: state.constant,
-  broker: state.broker,
-  user: state.user,
-  reinsurer: state.reinsurer,
   opportunity: state.opportunity
 });
 
 export default connect(mapStateToProps, {
-  getOpportunities,
-  getBrokers,
-  getUsers,
-  getReinsurers
+  getOpportunities
 })(Opportunities);

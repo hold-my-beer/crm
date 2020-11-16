@@ -25,9 +25,9 @@ const Search = ({
       <div className="search-labels">
         <label htmlFor="search">Поиск</label>
         <p
-          className="advanced-search-label"
+          className="filter-label"
           onClick={e => {
-            onClassChange('advanced-search show');
+            onClassChange('filter show');
           }}
         >
           Расширенный поиск
