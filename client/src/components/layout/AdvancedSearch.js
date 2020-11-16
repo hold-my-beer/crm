@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
 import NumberFormat from 'react-number-format';
@@ -618,10 +618,7 @@ AdvancedSearch.propTypes = {
   onAdvancedValueChange: PropTypes.func.isRequired,
   onAdvancedValuesSubmit: PropTypes.func.isRequired,
   toggleAny: PropTypes.object.isRequired,
-  onToggleAny: PropTypes.func.isRequired,
-  brokers: PropTypes.array.isRequired,
-  users: PropTypes.array.isRequired,
-  reinsurers: PropTypes.array.isRequired
+  onToggleAny: PropTypes.func.isRequired
 };
 
 export default AdvancedSearch;

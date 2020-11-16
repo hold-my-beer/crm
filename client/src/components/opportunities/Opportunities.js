@@ -5,11 +5,13 @@ import { getOpportunities } from '../../actions/opportunity';
 import { getBrokers } from '../../actions/broker';
 import { getUsers } from '../../actions/user';
 import { getReinsurers } from '../../actions/reinsurer';
+import hasSubstring from '../../utils/hasSubstring';
 import PropTypes from 'prop-types';
 import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 
-import Searches from '../layout/Searches';
+import Search from '../layout/Search';
+import AdvancedSearch from '../layout/AdvancedSearch';
 import Sort from '../layout/Sort';
 import Pagination from '../layout/Pagination';
 import Spinner from '../layout/Spinner';
@@ -25,26 +27,26 @@ const Opportunities = ({
   reinsurer: { reinsurers },
   opportunity: { opportunities, loading }
 }) => {
+  const [className, setClassName] = useState('advanced-search');
+
   const [filteredOpportunities, setFilteredOpportunities] = useState([]);
 
   const [sortedOpportunities, setSortedOpportunities] = useState([]);
 
   const [displayedOpportunities, setDisplayedOpportunities] = useState([]);
 
-  // const [displayedOpportunities, setDisplayedOpportunities] = useState(
-  //   opportunities
-  // );
-
-  /* Search */
-  const [searchValue, setSearchValue] = useState('');
-
-  const hasSubstring = (str, substr) => {
-    return str.toLowerCase().indexOf(substr.toLowerCase()) !== -1;
+  /* Toggle advanced search div */
+  const onClassChange = newClassName => {
+    setClassName(newClassName);
   };
 
-  const onSearchValueChange = newSearchValue => {
-    setSearchValue(newSearchValue);
-    const newDisplayedOpportunnities = [];
+  /* Search */
+  const onSearchChange = newFilteredOpportunities => {
+    setFilteredOpportunities(newFilteredOpportunities);
+  };
+
+  const filterOpportunities = newSearchValue => {
+    const newFilteredOpportunities = [];
 
     opportunities.forEach(opportunity => {
       if (
@@ -67,11 +69,11 @@ const Opportunities = ({
             hasSubstring(reinsurer.name, newSearchValue)
           ).length !== 0)
       ) {
-        newDisplayedOpportunnities.push(opportunity);
+        newFilteredOpportunities.push(opportunity);
       }
     });
 
-    setDisplayedOpportunities(newDisplayedOpportunnities);
+    return newFilteredOpportunities;
   };
 
   /* Advanced Search */
@@ -249,65 +251,8 @@ const Opportunities = ({
   };
 
   /* Sort */
-  const onSortByChange = e => {
-    let newDisplayedOpportunities = [];
-
-    switch (e.target.value) {
-      case 'Новые':
-        // setDisplayedOpportunities(
-        //   displayedOpportunities.sort(
-        //     (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt)
-        //   )
-        // );
-        newDisplayedOpportunities = [...displayedOpportunities].sort(
-          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
-        );
-        break;
-      case 'Ближайший дедлайн':
-        // console.log('in deadline');
-        // setDisplayedOpportunities(
-        //   displayedOpportunities.sort(
-        //     (a, b) => Date.parse(a.deadlineDate) - Date.parse(b.deadlineDate)
-        //   )
-        // );
-        newDisplayedOpportunities = [...displayedOpportunities].sort(
-          (a, b) => Date.parse(a.deadlineDate) - Date.parse(b.deadlineDate)
-        );
-        break;
-      case 'Ближайшая пролонгация':
-        // setDisplayedOpportunities(
-        //   displayedOpportunities.sort(
-        //     (a, b) => Date.parse(a.renewalDate) - Date.parse(b.renewalDate)
-        //   )
-        // );
-        newDisplayedOpportunities = [...displayedOpportunities].sort((a, b) =>
-          !a.renewalDate
-            ? 1
-            : !b.renewaldate
-            ? -1
-            : b.renewalDate - a.renewalDate
-        );
-
-        break;
-      case 'Большая сумма премии':
-        // setDisplayedOpportunities(
-        //   displayedOpportunities.sort(
-        //     (a, b) => parseInt(a.premium) - parseInt(b.premium)
-        //   )
-        // );
-        newDisplayedOpportunities = [...displayedOpportunities].sort((a, b) =>
-          !a.premium
-            ? 1
-            : !b.premium
-            ? -1
-            : parseInt(b.premium) - parseInt(a.premium)
-        );
-        break;
-      default:
-        return;
-    }
-
-    setDisplayedOpportunities(newDisplayedOpportunities);
+  const onSortChange = newSortedOpportunities => {
+    setSortedOpportunities(newSortedOpportunities);
   };
 
   /* Pagination */
@@ -318,10 +263,6 @@ const Opportunities = ({
   useEffect(() => {
     getOpportunities();
   }, [getOpportunities]);
-
-  // useEffect(() => {
-  //   setDisplayedOpportunities(opportunities.length === 0 ? [] : opportunities);
-  // }, [opportunities]);
 
   useEffect(() => {
     setFilteredOpportunities(opportunities.length === 0 ? [] : opportunities);
@@ -397,10 +338,21 @@ const Opportunities = ({
         Создать новый <span className="plus">+</span>
       </Link>
 
-      <Searches
+      <Search
+        className={className}
+        onClassChange={onClassChange}
+        rows={opportunities}
+        filteredRows={filteredOpportunities}
+        onSearchChange={onSearchChange}
+        filterRows={filterOpportunities}
+        // searchValue={searchValue}
+        // onSearchValueChange={onSearchValueChange}
+      />
+
+      <AdvancedSearch
         constant={constant}
-        searchValue={searchValue}
-        onSearchValueChange={onSearchValueChange}
+        className={className}
+        onClassChange={onClassChange}
         initialSearchParameters={initialSearchParameters}
         onSearchParametersReset={onSearchParametersReset}
         searchParameters={searchParameters}
@@ -412,10 +364,12 @@ const Opportunities = ({
         users={users}
         reinsurers={reinsurers}
       />
+
       <Sort
         constant={constant}
-        displayedOpportunities={displayedOpportunities}
-        onSortByChange={onSortByChange}
+        filteredRows={filteredOpportunities}
+        sortedRows={sortedOpportunities}
+        onSortChange={onSortChange}
       />
 
       {loading ? (
@@ -504,13 +458,11 @@ const Opportunities = ({
         </div>
       )}
 
-      {/* {displayedOpportunities.length !== 0 && ( */}
       <Pagination
         sortedRows={sortedOpportunities}
         displayedRows={displayedOpportunities}
         onPageParamsChange={onPageParamsChange}
       />
-      {/* )} */}
     </div>
   );
 };

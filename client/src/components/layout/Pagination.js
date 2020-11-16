@@ -5,13 +5,6 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
   const MIN_ROWNUMBER = 3;
 
   const [pageParams, setPageParams] = useState({
-    // rowsNumber: sortedRows.length,
-    // rowsPerPage: 3,
-    // totalPages: Math.floor((sortedRows.length - 1) / 3) + 1,
-    // currentPage: 1,
-    // startPosition: sortedRows.length !== 0 ? 0 : '',
-    // endPosition: sortedRows.length !== 0 ? 3 : ''
-
     rowsNumber: 0,
     rowsPerPage: 0,
     totalPages: 0,
@@ -35,18 +28,11 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
     setPageParams({
       ...pageParams,
       rowsPerPage: val,
-      totalPages: Math.floor((rowsNumber - 1) / MIN_ROWNUMBER) + 1,
+      totalPages: Math.floor((rowsNumber - 1) / val) + 1,
       currentPage: 1,
       startPosition: 0,
       endPosition: rowsNumber < val ? rowsNumber : val
     });
-
-    // const start = 0;
-    // const end = rowsNumber < val ? rowsNumber : val;
-    // const newDisplayedRows =
-    //   rowsNumber === 0 ? [] : [...sortedRows].splice(start, end);
-
-    // onPageParamsChange(newDisplayedRows);
   };
 
   const goToFirst = () => {
@@ -111,7 +97,7 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
     const newDisplayedRows = [...sortedRows].splice(startPosition, endPosition);
 
     onPageParamsChange(newDisplayedRows);
-  }, [startPosition, endPosition]);
+  }, [startPosition, endPosition, sortedRows]);
 
   return (
     <div className="pagination">
@@ -144,7 +130,9 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
         >
           {'<<'}
         </button>
-        <div className="currentPage">Страница {currentPage}</div>
+        <div className="currentPage">
+          Страница {currentPage} из {totalPages}
+        </div>
         <button
           className="btn btn-small btn-round btn-primary"
           onClick={nextPage}

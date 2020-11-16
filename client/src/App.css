@@ -385,6 +385,7 @@ td.sticky-column {
 .currentPage {
   padding: 0.5rem;
   margin-right: 0.5rem;
+  text-align: center;
 }
 
 /* Navbar */
