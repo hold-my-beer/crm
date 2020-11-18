@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
-  const MIN_ROWNUMBER = 3;
+  const rowsPerPageOptions = [3, 10, 25, 50];
+
+  const MIN_ROWNUMBER = rowsPerPageOptions[0];
 
   const [pageParams, setPageParams] = useState({
     rowsNumber: 0,
@@ -102,17 +104,18 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
   return (
     <div className="pagination">
       <div className="rows-number-group">
-        <label htmlFor="rowsPerPage">Количество строк</label>
+        <label htmlFor="rowsPerPage">Строк на странице</label>
         <select
           name="rowsPerPage"
           id="rowsPerPage"
           value={rowsPerPage}
           onChange={e => onRowsPerPageChange(e)}
         >
-          <option value="3">3</option>
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
+          {rowsPerPageOptions.map(item => (
+            <option key={rowsPerPageOptions.indexOf(item)} value={item}>
+              {item}
+            </option>
+          ))}
         </select>
       </div>
       <div className="pagination-group">

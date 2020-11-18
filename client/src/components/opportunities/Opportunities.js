@@ -11,6 +11,7 @@ import Search from '../layout/Search';
 import FilterOpportunities from './FilterOpportunities';
 import Sort from '../layout/Sort';
 import Pagination from '../layout/Pagination';
+import ExportToExcel from '../layout/ExportToExcel';
 import Spinner from '../layout/Spinner';
 
 const Opportunities = ({
@@ -25,6 +26,11 @@ const Opportunities = ({
   const [sortedOpportunities, setSortedOpportunities] = useState([]);
 
   const [displayedOpportunities, setDisplayedOpportunities] = useState([]);
+
+  const [dataToExport, setDataToExport] = useState({
+    data: [] /* Array of Arrays e.g. [["a","b"],[1,2]] */,
+    cols: [] /* Array of column objects e.g. { name: "C", K: 2 } */
+  });
 
   /* Toggle advanced search div */
   const onClassChange = newClassName => {
@@ -92,6 +98,50 @@ const Opportunities = ({
     setDisplayedOpportunities(opportunities.length === 0 ? [] : opportunities);
   }, [opportunities]);
 
+  useEffect(() => {
+    let data = [];
+
+    if (opportunities.length) {
+      data = sortedOpportunities.map(opportunity => [
+        opportunity.company.name,
+        opportunity.broker.name,
+        opportunity.contactPerson,
+        new Date(opportunity.deadlineDate),
+        opportunity.responsible.secondName,
+        opportunity.status,
+        opportunity.sentDate ? new Date(opportunity.sentDate) : '',
+        opportunity.quoteType,
+        opportunity.renewalDate ? new Date(opportunity.renewalDate) : '',
+        opportunity.reinsurers.length
+          ? opportunity.reinsurers.map(
+              reinsurer => reinsurer && reinsurer.name + ' '
+            )
+          : '',
+        opportunity.premium ? opportunity.premium : '',
+        opportunity.population ? opportunity.population : '',
+        opportunity.comment
+      ]);
+
+      data.unshift([
+        'Компания',
+        'Брокер',
+        'Контакт',
+        'Дедлайн',
+        'Ответственный',
+        'Статус',
+        'Отправлено',
+        'Тип',
+        'Дата пролонгации',
+        'Перестраховщики',
+        'Премия, руб.',
+        'Численность',
+        'Комментарий'
+      ]);
+    }
+
+    setDataToExport({ ...dataToExport, data });
+  }, [sortedOpportunities]);
+
   return (
     <div className="opportunities">
       <h1 className="my-1">Тендеры</h1>
@@ -124,6 +174,8 @@ const Opportunities = ({
         sortedRows={sortedOpportunities}
         onSortChange={onSortChange}
       />
+
+      <ExportToExcel dataToExport={dataToExport} />
 
       {loading ? (
         <Spinner />

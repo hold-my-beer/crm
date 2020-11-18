@@ -30,7 +30,7 @@ const Search = ({
             onClassChange('filter show');
           }}
         >
-          Расширенный поиск
+          Фильтры
         </p>
       </div>
 
