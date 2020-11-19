@@ -3,13 +3,12 @@ const router = express.Router();
 const { ensureAuth } = require('../../middleware/auth');
 const { check, validationResult } = require('express-validator');
 
-const Opportunity = require('../../models/Opportunity');
+const Lead = require('../../models/Lead');
 const Company = require('../../models/Company');
 const Broker = require('../../models/Broker');
-// const Reinsurer = require('../../models/Reinsurer');
 
-// @route   POST api/opportunities
-// @desc    Create opportunity
+// @route   POST api/leads
+// @desc    Create lead
 // @access  Private
 router.post(
   '/',
@@ -19,19 +18,17 @@ router.post(
       check('company', 'Укажите наименование компании').not().isEmpty(),
       check('broker', 'Укажите наименование брокера').not().isEmpty(),
       check('contactPerson', 'Укажите имя контакта').not().isEmpty(),
-      check('deadlineDate', 'Укажите дедлайн').not().isEmpty(),
-      check('responsible', 'Укажите ответственного сотрудника').not().isEmpty()
-      // check('premium', 'Премия должна быть числом больше 0').custom(
-      //   (val, req) => {
-      //     return val && parseFloat(val) > 0;
-      //   }
-      // ),
-      // check(
-      //   'population',
-      //   'Численность должна быть целым числом больше 0'
-      // ).custom((val, req) => {
-      //   return val && parseInt(val) > 0;
-      // })
+      check('renewalDate', 'Укажите следующую дату пролонгации')
+        .not()
+        .isEmpty(),
+      check('contactDate', 'Укажите следующую дату связи').not().isEmpty(),
+      check('responsible', 'Укажите ответственного сотрудника').not().isEmpty(),
+      check('copyTo', 'Укажите сотрудника в копии').not().isEmpty(),
+      check('premium', 'Премия должна быть числом больше 0').custom(
+        (val, req) => {
+          return val ? parseFloat(val) > 0 : true;
+        }
+      )
     ]
   ],
   async (req, res) => {
@@ -43,20 +40,14 @@ router.post(
 
     const {
       company,
-      // companyId,
       broker,
-      // brokerId,
       contactPerson,
-      deadlineDate,
+      renewalDate,
+      contactDate,
       responsible,
-      // status,
-      comment,
-      // sentDate,
-      quoteType,
-      renewalDate
-      // reinsurers,
-      // premium,
-      // population
+      copyTo,
+      premium,
+      comment
     } = req.body;
 
     let { companyId, brokerId } = req.body;
@@ -93,26 +84,22 @@ router.post(
         }
       }
 
-      const opportunity = new Opportunity({
+      const lead = new Lead({
         company: companyId,
         broker: brokerId,
         contactPerson: contactPerson ? contactPerson : '',
-        deadlineDate: deadlineDate ? deadlineDate : '',
-        responsible: responsible ? responsible : '',
-        status: 'В работе',
-        comment: comment ? comment : '',
-        sentDate: '',
-        quoteType: quoteType ? quoteType : '',
         renewalDate: renewalDate ? renewalDate : '',
-        reinsurers: [],
-        premium: '',
-        population: '',
+        contactDate: contactDate ? contactDate : '',
+        responsible: responsible ? responsible : '',
+        copyTo: copyTo ? copyTo : '',
+        premium: premium ? premium : '',
+        comment: comment ? comment : '',
         createdBy: req.user.id
       });
 
-      await opportunity.save();
+      await lead.save();
 
-      return res.json(opportunity);
+      return res.json(lead);
     } catch (err) {
       console.error(err.message);
       return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
@@ -120,8 +107,8 @@ router.post(
   }
 );
 
-// @route   PUT api/opportunities/:id
-// @desc    Update opportunity
+// @route   PUT api/leads/:id
+// @desc    Update lead
 // @access  Private
 router.put(
   '/:id',
@@ -131,20 +118,18 @@ router.put(
       check('company', 'Укажите наименование компании').not().isEmpty(),
       check('broker', 'Укажите наименование брокера').not().isEmpty(),
       check('contactPerson', 'Укажите имя контакта').not().isEmpty(),
-      check('deadlineDate', 'Укажите дедлайн').not().isEmpty(),
+      check('renewalDate', 'Укажите следующую дату пролонгации')
+        .not()
+        .isEmpty(),
+      check('contactDate', 'Укажите следующую дату связи').not().isEmpty(),
       check('responsible', 'Укажите ответственного сотрудника').not().isEmpty(),
+      check('copyTo', 'Укажите сотрудника в копии').not().isEmpty(),
       check('status', 'Укажите статус').not().isEmpty(),
       check('premium', 'Премия должна быть числом больше 0').custom(
         (val, req) => {
           return val ? parseFloat(val) > 0 : true;
         }
-      ),
-      check(
-        'population',
-        'Численность должна быть целым числом больше 0'
-      ).custom((val, req) => {
-        return val ? parseInt(val) > 0 : true;
-      })
+      )
     ]
   ],
   async (req, res) => {
@@ -156,21 +141,14 @@ router.put(
 
     const {
       company,
-      // companyId,
       broker,
-      // brokerId,
       contactPerson,
-      deadlineDate,
-      responsible,
-      status,
-      comment,
-      sentDate,
-      quoteType,
       renewalDate,
-      reinsurerNames,
-      reinsurerIds,
+      contactDate,
+      responsible,
+      copyTo,
       premium,
-      population
+      comment
     } = req.body;
 
     let { companyId, brokerId } = req.body;
@@ -207,32 +185,28 @@ router.put(
         }
       }
 
-      let opportunity = await Opportunity.findById(req.params.id);
+      let lead = await Lead.findById(req.params.id);
 
-      if (!opportunity) {
+      if (!lead) {
         return res
           .status(404)
           .json({ errors: [{ msg: 'Документ не найден' }] });
       }
 
-      opportunity.company = companyId;
-      opportunity.broker = brokerId;
-      if (contactPerson) opportunity.contactPerson = contactPerson;
-      if (deadlineDate) opportunity.deadlineDate = deadlineDate;
-      if (responsible) opportunity.responsible = responsible;
-      if (status) opportunity.status = status;
-      if (comment) opportunity.comment = comment;
-      if (sentDate) opportunity.sentDate = sentDate;
-      if (quoteType) opportunity.quoteType = quoteType;
-      if (renewalDate) opportunity.renewalDate = renewalDate;
-      if (reinsurerIds) opportunity.reinsurers = reinsurerIds;
-      if (premium) opportunity.premium = premium;
-      if (population) opportunity.population = population;
-      opportunity.createdBy = req.user.id;
+      lead.company = companyId;
+      lead.broker = brokerId;
+      if (contactPerson) lead.contactPerson = contactPerson;
+      if (renewalDate) lead.renewalDate = renewalDate;
+      if (contactDate) lead.contactDate = contactDate;
+      if (responsible) lead.responsible = responsible;
+      if (copyTo) lead.copyTo = copyTo;
+      if (premium) lead.premium = premium;
+      if (comment) lead.comment = comment;
+      lead.createdBy = req.user.id;
 
-      await opportunity.save();
+      await lead.save();
 
-      return res.json(opportunity);
+      return res.json(lead);
     } catch (err) {
       if (err.kind === 'ObjectId') {
         return res
@@ -246,44 +220,45 @@ router.put(
   }
 );
 
-// @route   GET api/opportunities
-// @desc    Get all opportunities
+// @route   GET api/leads
+// @desc    Get all leads
 // @access  Private
 router.get('/', ensureAuth, async (req, res) => {
   try {
-    const opportunities = await Opportunity.find()
+    const leads = await Lead.find()
       .populate('company', 'name')
       .populate('broker', 'name')
       .populate('responsible', 'secondName')
-      .populate('reinsurers', 'name')
+      .populate('copyTo', 'secondName')
       .sort({ createdAt: -1 });
 
-    if (!opportunities) {
-      return res.status(404).json({ msg: 'Тендеры не найдены' });
+    if (!leads) {
+      return res.status(404).json({ msg: 'Лиды не найдены' });
     }
 
-    return res.json(opportunities);
+    return res.json(leads);
   } catch (err) {
     console.log(err);
     return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
   }
 });
 
-// @route   GET api/opportunities/:id
-// @desc    Get opportunity by id
+// @route   GET api/leads/:id
+// @desc    Get lead by id
 // @access  Private
 router.get('/:id', ensureAuth, async (req, res) => {
   try {
-    const opportunity = await Opportunity.findById(req.params.id)
+    const lead = await Lead.findById(req.params.id)
       .populate('company', 'name')
       .populate('broker', 'name')
-      .populate('responsible', 'secondName');
+      .populate('responsible', 'secondName')
+      .populate('copyTo', 'secondName');
 
-    if (!opportunity) {
-      return res.status(404).json({ msg: 'Тендер не найден' });
+    if (!lead) {
+      return res.status(404).json({ msg: 'Лид не найден' });
     }
 
-    return res.json(opportunity);
+    return res.json(lead);
   } catch (err) {
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ errors: [{ msg: 'Документ не найден' }] });
@@ -294,14 +269,14 @@ router.get('/:id', ensureAuth, async (req, res) => {
   }
 });
 
-// @route   DELETE api/opportunities/:id
-// @desc    Delete opportunity
+// @route   DELETE api/leads/:id
+// @desc    Delete lead
 // @access  Private
 router.delete('/:id', ensureAuth, async (req, res) => {
   try {
-    await Opportunity.findByIdAndDelete(req.params.id);
+    await lead.findByIdAndDelete(req.params.id);
 
-    return res.json({ msg: 'Тендер успешно удален' });
+    return res.json({ msg: 'Лид успешно удален' });
   } catch (err) {
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ errors: [{ msg: 'Документ не найден' }] });
