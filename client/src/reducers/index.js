@@ -3,6 +3,7 @@ import auth from './auth';
 import constant from './constant';
 import alert from './alert';
 import opportunity from './opportunity';
+import lead from './lead';
 import company from './company';
 import broker from './broker';
 import reinsurer from './reinsurer';
@@ -14,6 +15,7 @@ export default combineReducers({
   constant,
   alert,
   opportunity,
+  lead,
   company,
   broker,
   reinsurer,

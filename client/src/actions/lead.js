@@ -1,27 +1,27 @@
 import axios from 'axios';
 import {
-  ADD_OPPORTUNITY,
-  UPDATE_OPPORTUNITY,
-  SET_OPPORTUNITY_LOADING,
-  OPPORTUNITY_ERROR,
-  GET_OPPORTUNITIES,
-  GET_OPPORTUNITY,
-  DELETE_OPPORTUNITY,
+  ADD_LEAD,
+  UPDATE_LEAD,
+  SET_LEAD_LOADING,
+  LEAD_ERROR,
+  GET_LEADS,
+  GET_LEAD,
+  DELETE_LEAD,
   RESET_DELETE
 } from './types';
 import { setAlert, removeAlert } from './alert';
 
-// Get all opportunities
-export const getOpportunities = () => async dispatch => {
+// Get all leads
+export const getLeads = () => async dispatch => {
   dispatch(removeAlert());
 
-  dispatch(setOpportunityLoading());
+  dispatch(setLeadLoading());
 
   try {
-    const res = await axios.get('/api/opportunities');
+    const res = await axios.get('/api/leads');
 
     dispatch({
-      type: GET_OPPORTUNITIES,
+      type: GET_LEADS,
       payload: res.data
     });
   } catch (err) {
@@ -32,21 +32,21 @@ export const getOpportunities = () => async dispatch => {
     }
 
     dispatch({
-      type: OPPORTUNITY_ERROR,
+      type: LEAD_ERROR,
       payload: errors
     });
   }
 };
 
-// Get opportunity by id
-export const getOpportunityById = id => async dispatch => {
-  dispatch(setOpportunityLoading());
+// Get lead by id
+export const getLeadById = id => async dispatch => {
+  dispatch(setLeadLoading());
 
   try {
-    const res = await axios.get(`/api/opportunities/${id}`);
+    const res = await axios.get(`/api/leads/${id}`);
 
     dispatch({
-      type: GET_OPPORTUNITY,
+      type: GET_LEAD,
       payload: res.data
     });
   } catch (err) {
@@ -57,17 +57,17 @@ export const getOpportunityById = id => async dispatch => {
     }
 
     dispatch({
-      type: OPPORTUNITY_ERROR,
+      type: LEAD_ERROR,
       payload: errors
     });
   }
 };
 
-// Add opportunity
-export const addOpportunity = (formData, history) => async dispatch => {
+// Add lead
+export const addLead = (formData, history) => async dispatch => {
   dispatch(removeAlert());
 
-  dispatch(setOpportunityLoading());
+  dispatch(setLeadLoading());
 
   const config = {
     headers: {
@@ -76,14 +76,14 @@ export const addOpportunity = (formData, history) => async dispatch => {
   };
 
   try {
-    const res = await axios.post('/api/opportunities', formData, config);
+    const res = await axios.post('/api/leads', formData, config);
 
     dispatch({
-      type: ADD_OPPORTUNITY,
+      type: ADD_LEAD,
       payload: res.data
     });
 
-    history.push('/opportunities');
+    history.push('/leads');
   } catch (err) {
     const errors = err.response.data.errors;
 
@@ -92,17 +92,17 @@ export const addOpportunity = (formData, history) => async dispatch => {
     }
 
     dispatch({
-      type: OPPORTUNITY_ERROR,
+      type: LEAD_ERROR,
       payload: errors
     });
   }
 };
 
-// Update opportunity
-export const updateOpportunity = (id, formData, history) => async dispatch => {
+// Update lead
+export const updateLead = (id, formData, history) => async dispatch => {
   dispatch(removeAlert());
 
-  dispatch(setOpportunityLoading());
+  dispatch(setLeadLoading());
 
   const config = {
     headers: {
@@ -111,14 +111,14 @@ export const updateOpportunity = (id, formData, history) => async dispatch => {
   };
 
   try {
-    const res = await axios.put(`/api/opportunities/${id}`, formData, config);
+    const res = await axios.put(`/api/leads/${id}`, formData, config);
 
     dispatch({
-      type: UPDATE_OPPORTUNITY,
+      type: UPDATE_LEAD,
       payload: res.data
     });
 
-    history.push('/opportunities');
+    history.push('/leads');
   } catch (err) {
     const errors = err.response.data.errors;
 
@@ -127,31 +127,29 @@ export const updateOpportunity = (id, formData, history) => async dispatch => {
     }
 
     dispatch({
-      type: OPPORTUNITY_ERROR,
+      type: LEAD_ERROR,
       payload: errors
     });
   }
 };
 
-// Delete opportunity
-export const removeOpportunity = (id, history) => async dispatch => {
-  dispatch(setOpportunityLoading());
+// Delete lead
+export const removeLead = (id, history) => async dispatch => {
+  dispatch(setLeadLoading());
 
   try {
-    await axios.delete(`/api/opportunities/${id}`);
+    await axios.delete(`/api/leads/${id}`);
 
     dispatch({
       type: RESET_DELETE
     });
 
     dispatch({
-      type: DELETE_OPPORTUNITY,
+      type: DELETE_LEAD,
       payload: id
     });
 
-    // dispatch(setAlert(res.data.msg, 'success'));
-
-    history.push('/opportunities');
+    history.push('/leads');
   } catch (err) {
     const errors = err.response.data.errors;
 
@@ -160,14 +158,14 @@ export const removeOpportunity = (id, history) => async dispatch => {
     }
 
     dispatch({
-      type: OPPORTUNITY_ERROR,
+      type: LEAD_ERROR,
       payload: errors
     });
   }
 };
 
-export const setOpportunityLoading = () => dispatch => {
+export const setLeadLoading = () => dispatch => {
   dispatch({
-    type: SET_OPPORTUNITY_LOADING
+    type: SET_LEAD_LOADING
   });
 };
