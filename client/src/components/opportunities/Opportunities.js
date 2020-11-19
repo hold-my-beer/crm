@@ -146,7 +146,10 @@ const Opportunities = ({
     <div className="opportunities">
       <h1 className="my-1">Тендеры</h1>
       <p className="lead">Информация о тендерах</p>
-      <Link to="/create-opportunity" className="btn btn-round btn-primary">
+      <Link
+        to="/create-opportunity"
+        className="btn btn-small btn-round btn-primary"
+      >
         Создать новый <span className="plus">+</span>
       </Link>
 

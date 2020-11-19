@@ -21,7 +21,7 @@ const ExportToExcel = ({ dataToExport }) => {
     <div>
       <button
         disabled={!dataToExport.data.length}
-        className="btn btn-round btn-dark"
+        className="btn btn-small btn-round btn-dark"
         onClick={exportFile}
       >
         Выгрузить в Excel

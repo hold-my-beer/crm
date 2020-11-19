@@ -1,35 +1,48 @@
 const mongoose = require('mongoose');
 
 const LeadSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'company'
   },
   broker: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'broker'
+  },
+  contactPerson: {
     type: String,
     required: true
   },
+  renewalDate: {
+    type: Date,
+    required: true
+  },
+  contactDate: {
+    type: Date,
+    required: true
+  },
+  responsible: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
+  },
+  copyTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
+  },
   premium: {
-    type: String
-  },
-  nextRenewalDate: {
-    type: Date,
-    required: true
-  },
-  nextContactDate: {
-    type: Date,
-    required: true
+    type: Number
   },
   comment: {
     type: String
   },
-  responsible: {
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  copyTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
+    ref: 'user'
   },
   createdAt: {
     type: Date,
