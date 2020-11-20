@@ -9,6 +9,8 @@ import Alert from '../layout/Alert';
 import Opportunities from '../opportunities/Opportunities';
 import CreateOpportunity from '../opportunities/CreateOpportunity';
 import EditOpportunity from '../opportunities/EditOpportunity';
+import Leads from '../leads/Leads';
+import CreateLead from '../leads/CreateLead';
 import DeleteModal from '../layout/DeleteModal';
 
 const Routes = () => {
@@ -36,6 +38,8 @@ const Routes = () => {
             path="/edit-opportunity/:id"
             component={EditOpportunity}
           />
+          <PrivateRoute exact path="/leads" component={Leads} />
+          <PrivateRoute exact path="/create-lead" component={CreateLead} />
         </Switch>
       </div>
       <PrivateRoute component={DeleteModal} />

@@ -32,7 +32,7 @@ const Opportunities = ({
     cols: [] /* Array of column objects e.g. { name: "C", K: 2 } */
   });
 
-  /* Toggle advanced search div */
+  /* Toggle filter div */
   const onClassChange = newClassName => {
     setClassName(newClassName);
   };
