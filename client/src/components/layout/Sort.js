@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
 
-const Sort = ({ constant, filteredRows, sortedRows, onSortChange }) => {
+const Sort = ({ sortOptions, filteredRows, sortedRows, onSortChange }) => {
   const [sortBy, setSortBy] = useState('Новые');
 
   const sortRows = val => {
@@ -26,6 +26,15 @@ const Sort = ({ constant, filteredRows, sortedRows, onSortChange }) => {
             : !b.renewalDate
             ? -1
             : Date.parse(a.renewalDate) - Date.parse(b.renewalDate)
+        );
+        break;
+      case 'Ближайшая дата связи':
+        newSortedRows = [...filteredRows].sort((a, b) =>
+          !a.contactDate
+            ? 1
+            : !b.contactDate
+            ? -1
+            : Date.parse(a.contactDate) - Date.parse(b.contactDate)
         );
         break;
       case 'Большая сумма премии':
@@ -72,8 +81,8 @@ const Sort = ({ constant, filteredRows, sortedRows, onSortChange }) => {
           onChange(e);
         }}
       >
-        {constant.SORT_OPPORTUNITIES_BY &&
-          constant.SORT_OPPORTUNITIES_BY.map(sortOption => (
+        {sortOptions.length &&
+          sortOptions.map(sortOption => (
             <option key={uuidv4()} value={sortOption}>
               {sortOption}
             </option>
@@ -84,7 +93,7 @@ const Sort = ({ constant, filteredRows, sortedRows, onSortChange }) => {
 };
 
 Sort.propTypes = {
-  constant: PropTypes.object.isRequired,
+  sortOptions: PropTypes.array.isRequired,
   filteredRows: PropTypes.array.isRequired,
   sortedRows: PropTypes.array.isRequired,
   onSortChange: PropTypes.func.isRequired

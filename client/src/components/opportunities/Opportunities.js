@@ -172,7 +172,9 @@ const Opportunities = ({
       />
 
       <Sort
-        constant={constant}
+        sortOptions={
+          constant.SORT_OPPORTUNITIES_BY ? constant.SORT_OPPORTUNITIES_BY : []
+        }
         filteredRows={filteredOpportunities}
         sortedRows={sortedOpportunities}
         onSortChange={onSortChange}

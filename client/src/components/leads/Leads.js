@@ -147,7 +147,7 @@ const Leads = ({
       /> */}
 
       <Sort
-        constant={constant}
+        sortOptions={constant.SORT_LEADS_BY ? constant.SORT_LEADS_BY : []}
         filteredRows={filteredLeads}
         sortedRows={sortedLeads}
         onSortChange={onSortChange}

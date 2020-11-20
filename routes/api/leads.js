@@ -124,7 +124,6 @@ router.put(
       check('contactDate', 'Укажите следующую дату связи').not().isEmpty(),
       check('responsible', 'Укажите ответственного сотрудника').not().isEmpty(),
       check('copyTo', 'Укажите сотрудника в копии').not().isEmpty(),
-      check('status', 'Укажите статус').not().isEmpty(),
       check('premium', 'Премия должна быть числом больше 0').custom(
         (val, req) => {
           return val ? parseFloat(val) > 0 : true;
@@ -274,7 +273,7 @@ router.get('/:id', ensureAuth, async (req, res) => {
 // @access  Private
 router.delete('/:id', ensureAuth, async (req, res) => {
   try {
-    await lead.findByIdAndDelete(req.params.id);
+    await Lead.findByIdAndDelete(req.params.id);
 
     return res.json({ msg: 'Лид успешно удален' });
   } catch (err) {

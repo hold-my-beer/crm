@@ -248,7 +248,10 @@ const EditOpportunity = ({
           <div className="edit-opportunity">
             <h1 className="my-1">Редактировать тендер</h1>
             <p className="lead">Измените данные по тендеру</p>
-            <Link to="/create-contracts" className="btn btn-round btn-primary">
+            <Link
+              to="/create-contracts"
+              className="btn btn-small btn-round btn-primary"
+            >
               Создать контракты <span className="plus">+</span>
             </Link>
             <p className="my-1">
