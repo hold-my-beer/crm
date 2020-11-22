@@ -7,6 +7,7 @@ import { getBrokers } from '../../actions/broker';
 import { getUsers } from '../../actions/user';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 
 const CreateOpportunity = ({
   addOpportunity,
@@ -17,6 +18,7 @@ const CreateOpportunity = ({
   broker: { brokers },
   user: { users },
   constant: { constant },
+  lead: { lead },
   history
 }) => {
   const [formData, setFormData] = useState({
@@ -119,6 +121,22 @@ const CreateOpportunity = ({
         constant.QUOTE_TYPES[0]
     });
   }, [constant]);
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      company: lead.company.name ? lead.company.name : '',
+      companyId: lead.company._id ? lead.company._id : '',
+      broker: lead.broker.name ? lead.broker.name : '',
+      brokerId: lead.broker._id ? lead.broker._id : '',
+      contactPerson: lead.contactPerson ? lead.contactPerson : '',
+      responsible: lead.responsible._id ? lead.responsible._id : '',
+      comment: lead.comment ? lead.comment : '',
+      renewalDate: lead.renewalDate
+        ? moment(lead.renewalDate).format('YYYY-MM-DD')
+        : ''
+    });
+  }, [lead]);
 
   return (
     <div className="create-opportunity">
@@ -286,14 +304,16 @@ CreateOpportunity.propTypes = {
   company: PropTypes.object.isRequired,
   broker: PropTypes.object.isRequired,
   user: PropTypes.object.isRequired,
-  constant: PropTypes.object.isRequired
+  constant: PropTypes.object.isRequired,
+  lead: PropTypes.object.isRequired
 };
 
 const mapStateToProps = state => ({
   company: state.company,
   broker: state.broker,
   user: state.user,
-  constant: state.constant
+  constant: state.constant,
+  lead: state.lead
 });
 
 export default connect(mapStateToProps, {
