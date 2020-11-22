@@ -9,7 +9,6 @@ import { showDelete } from '../../actions/del';
 import PropTypes from 'prop-types';
 
 import moment from 'moment';
-import { v4 as uuidv4 } from 'uuid';
 import NumberFormat from 'react-number-format';
 import Spinner from '../layout/Spinner';
 

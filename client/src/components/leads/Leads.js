@@ -8,7 +8,7 @@ import Moment from 'react-moment';
 import NumberFormat from 'react-number-format';
 
 import Search from '../layout/Search';
-// import FilterLeads from './FilterLeads';
+import FilterLeads from './FilterLeads';
 import Sort from '../layout/Sort';
 import Pagination from '../layout/Pagination';
 import ExportToExcel from '../layout/ExportToExcel';
@@ -137,14 +137,14 @@ const Leads = ({
         filterRows={filterLeads}
       />
 
-      {/* <FilterLeads
+      <FilterLeads
         className={className}
         onClassChange={onClassChange}
         leads={leads}
         filteredLeads={filteredLeads}
         onFilterSubmit={onFilterSubmit}
         constant={constant}
-      /> */}
+      />
 
       <Sort
         sortOptions={constant.SORT_LEADS_BY ? constant.SORT_LEADS_BY : []}
