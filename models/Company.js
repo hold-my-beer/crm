@@ -5,19 +5,19 @@ const CompanySchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  entities: [
-    {
-      name: {
-        type: String,
-        required: true
-      },
-      activityType: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'activityType'
-      }
-    }
-  ],
+  // entities: [
+  //   {
+  //     name: {
+  //       type: String,
+  //       required: true
+  //     },
+  //     activityType: {
+  //       type: mongoose.Schema.Types.ObjectId,
+  //       required: true,
+  //       ref: 'activityType'
+  //     }
+  //   }
+  // ],
   rightToMention: {
     type: String
   },

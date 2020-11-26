@@ -8,7 +8,7 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
 
   const [pageParams, setPageParams] = useState({
     rowsNumber: 0,
-    rowsPerPage: 0,
+    rowsPerPage: MIN_ROWNUMBER,
     totalPages: 0,
     currentPage: 0,
     startPosition: -1,
@@ -82,15 +82,18 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
     setPageParams({
       ...pageParams,
       rowsNumber: sortedRows.length,
-      rowsPerPage: MIN_ROWNUMBER,
-      totalPages: Math.floor((sortedRows.length - 1) / MIN_ROWNUMBER) + 1,
+      // rowsPerPage:
+      //   !rowsPerPage || rowsPerPage === MIN_ROWNUMBER
+      //     ? MIN_ROWNUMBER
+      //     : rowsPerPage,
+      totalPages: Math.floor((sortedRows.length - 1) / rowsPerPage) + 1,
       currentPage: 1,
       startPosition: sortedRows.length !== 0 ? 0 : -1,
       endPosition:
         sortedRows.length !== 0
-          ? sortedRows < MIN_ROWNUMBER
-            ? sortedRows
-            : MIN_ROWNUMBER
+          ? sortedRows.length < rowsPerPage
+            ? sortedRows.length
+            : rowsPerPage
           : -1
     });
   }, [sortedRows]);
@@ -122,14 +125,14 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
         <button
           className="btn btn-small btn-round btn-primary"
           onClick={goToFirst}
-          disabled={currentPage === 1}
+          disabled={!rowsNumber || currentPage === 1}
         >
           Начало
         </button>
         <button
           className="btn btn-small btn-round btn-primary"
           onClick={prevPage}
-          disabled={currentPage === 1}
+          disabled={!rowsNumber || currentPage === 1}
         >
           {'<<'}
         </button>
@@ -139,14 +142,14 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
         <button
           className="btn btn-small btn-round btn-primary"
           onClick={nextPage}
-          disabled={currentPage === totalPages}
+          disabled={!rowsNumber || currentPage === totalPages}
         >
           {'>>'}
         </button>
         <button
           className="btn btn-small btn-round btn-primary"
           onClick={goToLast}
-          disabled={currentPage === totalPages}
+          disabled={!rowsNumber || currentPage === totalPages}
         >
           Конец
         </button>

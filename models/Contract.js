@@ -1,55 +1,63 @@
 const mongoose = require('mongoose');
 
 const ContractSchema = new mongoose.Schema({
-  number: {
-    type: String,
-    required: true
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'company'
   },
   entity: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  company: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true
-  },
-  dateStart: {
-    type: Date,
-    required: true
-  },
-  dateEnd: {
-    type: Date,
-    required: true
-  },
-  renewalDate: {
-    type: Date,
-    required: true
+    required: true,
+    ref: 'entity'
   },
   premium: {
     type: Number,
     required: true
   },
-  okved: {
+  number: {
     type: String,
     required: true
   },
-  mainActivity: {
-    type: String,
+  startDate: {
+    type: Date,
     required: true
   },
-  referencePossible: {
-    type: Boolean
+  endDate: {
+    type: Date,
+    required: true
+  },
+  nextRenewalDate: {
+    type: Date,
+    required: true
   },
   responsible: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true
+    required: true,
+    ref: 'user'
   },
+  reinsurers: [
+    {
+      _id: false,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'reinsurer'
+    }
+  ],
   broker: {
     type: String,
+    required: true,
+    ref: 'broker'
+  },
+  brokerEmployee: {
+    type: String,
     required: true
   },
-  reinsurer: {
-    type: String,
+  population: {
+    type: Number,
+    required: true
+  },
+  isRenewal: {
+    type: Boolean,
     required: true
   },
   commission: {
@@ -58,6 +66,11 @@ const ContractSchema = new mongoose.Schema({
   },
   renewalProbability: {
     type: Number
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user'
   },
   createdAt: {
     type: Date,
