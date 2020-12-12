@@ -425,6 +425,7 @@ const EditOpportunity = ({
                             id={reinsurer.name}
                             value={reinsurer.name}
                             onChange={e => onChange(e)}
+                            checked={reinsurerIds.indexOf(reinsurer._id) !== -1}
                           />
                           <label htmlFor={reinsurer.name}>
                             {reinsurer.name}

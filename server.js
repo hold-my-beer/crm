@@ -13,8 +13,11 @@ app.use('/api/constants', require('./routes/api/constants'));
 app.use('/api/companies', require('./routes/api/companies'));
 app.use('/api/brokers', require('./routes/api/brokers'));
 app.use('/api/reinsurers', require('./routes/api/reinsurers'));
+app.use('/api/entities', require('./routes/api/entities'));
+app.use('/api/activityTypes', require('./routes/api/activityTypes'));
 app.use('/api/opportunities', require('./routes/api/opportunities'));
 app.use('/api/leads', require('./routes/api/leads'));
+app.use('/api/contracts', require('./routes/api/contracts'));
 
 const PORT = process.env.PORT || 5000;
 

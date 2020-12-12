@@ -7,6 +7,8 @@ import lead from './lead';
 import company from './company';
 import broker from './broker';
 import reinsurer from './reinsurer';
+import entity from './entity';
+import activityType from './activityType';
 import user from './user';
 import del from './del';
 
@@ -19,6 +21,8 @@ export default combineReducers({
   company,
   broker,
   reinsurer,
+  entity,
+  activityType,
   user,
   del
 });

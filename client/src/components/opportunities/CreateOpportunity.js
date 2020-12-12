@@ -123,19 +123,21 @@ const CreateOpportunity = ({
   }, [constant]);
 
   useEffect(() => {
-    setFormData({
-      ...formData,
-      company: lead.company.name ? lead.company.name : '',
-      companyId: lead.company._id ? lead.company._id : '',
-      broker: lead.broker.name ? lead.broker.name : '',
-      brokerId: lead.broker._id ? lead.broker._id : '',
-      contactPerson: lead.contactPerson ? lead.contactPerson : '',
-      responsible: lead.responsible._id ? lead.responsible._id : '',
-      comment: lead.comment ? lead.comment : '',
-      renewalDate: lead.renewalDate
-        ? moment(lead.renewalDate).format('YYYY-MM-DD')
-        : ''
-    });
+    if (lead) {
+      setFormData({
+        ...formData,
+        company: lead.company.name ? lead.company.name : '',
+        companyId: lead.company._id ? lead.company._id : '',
+        broker: lead.broker.name ? lead.broker.name : '',
+        brokerId: lead.broker._id ? lead.broker._id : '',
+        contactPerson: lead.contactPerson ? lead.contactPerson : '',
+        responsible: lead.responsible._id ? lead.responsible._id : '',
+        comment: lead.comment ? lead.comment : '',
+        renewalDate: lead.renewalDate
+          ? moment(lead.renewalDate).format('YYYY-MM-DD')
+          : ''
+      });
+    }
   }, [lead]);
 
   return (

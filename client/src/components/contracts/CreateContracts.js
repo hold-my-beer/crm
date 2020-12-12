@@ -1,20 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+import { getEntities } from '../../actions/entity';
+import { getActivityTypes } from '../../actions/activityType';
+import { getUsers } from '../../actions/user';
+import { getReinsurers } from '../../actions/reinsurer';
+import { getBrokers } from '../../actions/broker';
+import { addContracts } from '../../actions/contract';
 import PropTypes from 'prop-types';
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 
 import CreateContract from './CreateContract';
 
 const CreateContracts = ({
+  getEntities,
+  entity: { entities },
+  getActivityTypes,
+  activityType: { activityTypes },
   opportunity: { opportunity },
-  company: { companies }
+  company: { companies },
+  getUsers,
+  user: { users },
+  getReinsurers,
+  reinsurer: { reinsurers },
+  getBrokers,
+  broker: { brokers },
+  addContracts
 }) => {
   const [formData, setFormData] = useState({
     company: '',
     companyId: '',
-    contracts: []
+    rightToMention: 'unknown',
+    responsible: '',
+    broker: '',
+    brokerId: '',
+    brokerEmployee: '',
+    commission: '',
+    contracts: [
+      {
+        id: uuidv4(),
+        entity: '',
+        activityType: '',
+        contactPerson: '',
+        phoneNumber: '',
+        email: '',
+        premium: '',
+        number: '',
+        startDate: '',
+        endDate: '',
+        nextRenewalDate: '',
+        // responsible: '',
+        reinsurerNames: [],
+        reinsurerIds: [],
+        // broker: '',
+        // brokerEmployee: '',
+        population: '',
+        isRenewal: false,
+        // commission: '',
+        renewalProbability: ''
+      }
+    ]
   });
 
-  const { company, companyId, contracts } = formData;
+  const {
+    company,
+    companyId,
+    rightToMention,
+    responsible,
+    broker,
+    brokerId,
+    brokerEmployee,
+    commission,
+    contracts
+  } = formData;
+
+  const [brokerEmployees, setBrokerEmployees] = useState([]);
 
   const getId = (name, val) => {
     switch (name) {
@@ -26,26 +86,105 @@ const CreateContracts = ({
         }
         return '';
       }
-      //   case 'broker': {
-      //     for (let i = 0; i < brokers.length; i++) {
-      //       if (brokers[i].name === val) {
-      //         return brokers[i]._id;
-      //       }
-      //     }
-      //     return '';
-      //   }
+      case 'broker': {
+        for (let i = 0; i < brokers.length; i++) {
+          if (brokers[i].name === val) {
+            return brokers[i]._id;
+          }
+        }
+        return '';
+      }
+      case 'okved': {
+        for (let i = 0; i < activityTypes.length; i++) {
+          if (activityTypes[i].code === val) {
+            return activityTypes[i]._id;
+          }
+        }
+      }
+      case 'reinsurerNames': {
+        for (let i = 0; i < reinsurers.length; i++) {
+          if (reinsurers[i].name === val) {
+            return reinsurers[i]._id;
+          }
+        }
+        break;
+      }
       default:
         return '';
     }
   };
 
+  const getBrokersEmployees = brokerName => {
+    for (let i = 0; i < brokers.length; i++) {
+      if (brokers[i].name === brokerName) {
+        return brokers[i].employees;
+      }
+    }
+    return [];
+  };
+
+  const fillBrokerEmployees = e => {
+    setBrokerEmployees(
+      brokers && brokers.length > 0 && getBrokersEmployees(e.target.value)
+    );
+  };
+
   useEffect(() => {
-    setFormData({
-      ...formData,
-      company: !opportunity.company ? '' : opportunity.company.name,
-      companyId: !opportunity.company ? '' : opportunity.company._id
-    });
+    if (opportunity) {
+      setFormData({
+        ...formData,
+        company: !opportunity.company ? '' : opportunity.company.name,
+        companyId: !opportunity.company ? '' : opportunity.company._id,
+        broker: !opportunity.broker ? '' : opportunity.broker.name,
+        brokerId: !opportunity.broker ? '' : opportunity.broker._id,
+        brokerEmployee: !opportunity.contactPerson
+          ? ''
+          : opportunity.contactPerson,
+        contracts: contracts.map(contract => ({
+          ...contract,
+          startDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate).format('YYYY-MM-DD'),
+          endDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate)
+                .add(1, 'years')
+                .format('YYYY-MM-DD'),
+          nextRenewalDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate)
+                .add(1, 'years')
+                .format('YYYY-MM-DD'),
+          reinsurerIds: !opportunity.reinsurers.length
+            ? []
+            : opportunity.reinsurers.map(reinsurer => reinsurer._id),
+          reinsurerNames: !opportunity.reinsurers.length
+            ? []
+            : opportunity.reinsurers.map(reinsurer => reinsurer.name)
+        }))
+      });
+    }
   }, [opportunity]);
+
+  useEffect(() => {
+    getEntities();
+  }, [getEntities]);
+
+  useEffect(() => {
+    getActivityTypes();
+  }, [getActivityTypes]);
+
+  useEffect(() => {
+    getUsers();
+  }, [getUsers]);
+
+  useEffect(() => {
+    getReinsurers();
+  }, [getReinsurers]);
+
+  useEffect(() => {
+    getBrokers();
+  }, [getBrokers]);
 
   const onChange = e => {
     const name = e.target.name;
@@ -53,10 +192,119 @@ const CreateContracts = ({
 
     setFormData({
       ...formData,
+
       [name]: val,
-      companyId: name === 'company' ? getId('company', val) : companyId
-      //   brokerId: name === 'broker' ? getId('broker', val) : brokerId
+      commission:
+        name === 'commission' ? parseInt(val.replace(/\s+/g, '')) : '',
+      companyId: name === 'company' ? getId('company', val) : companyId,
+      brokerId: name === 'broker' ? getId('broker', val) : brokerId
     });
+  };
+
+  const onContractAdd = e => {
+    setFormData({
+      ...formData,
+      contracts: [
+        ...contracts,
+        {
+          id: uuidv4(),
+          entity: '',
+          activityType: contracts.length ? contracts[0].activityType : '',
+          contactPerson: contracts.length ? contracts[0].contactPerson : '',
+          phoneNumber: contracts.length ? contracts[0].phoneNumber : '',
+          email: contracts.length ? contracts[0].email : '',
+          premium: '',
+          number: '',
+          startDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate).format('YYYY-MM-DD'),
+          endDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate)
+                .add(1, 'years')
+                .format('YYYY-MM-DD'),
+          nextRenewalDate: !opportunity.renewalDate
+            ? ''
+            : moment(opportunity.renewalDate)
+                .add(1, 'years')
+                .format('YYYY-MM-DD'),
+          // responsible: '',
+          reinsurerNames: !opportunity.reinsurers.length
+            ? []
+            : opportunity.reinsurers.map(reinsurer => reinsurer.name),
+          reinsurerIds: !opportunity.reinsurers.length
+            ? []
+            : opportunity.reinsurers.map(reinsurer => reinsurer._id),
+          // broker: '',
+          // brokerEmployee: '',
+          population: '',
+          isRenewal: contracts.length ? contracts[0].isRenewal : '',
+          // commission: '',
+          renewalProbability: ''
+        }
+      ]
+    });
+  };
+
+  const onContractDelete = id => {
+    setFormData({
+      ...formData,
+      contracts: contracts.filter(contract => contract.id !== id)
+    });
+  };
+
+  const onContractChange = (contractId, e) => {
+    const name = e.target.name;
+    const val = e.target.value;
+
+    setFormData({
+      ...formData,
+      contracts: contracts.map(contract =>
+        contract.id !== contractId
+          ? contract
+          : name === 'code'
+          ? { ...contract, activityType: getId('okved', val) }
+          : name === 'reinsurerNames'
+          ? e.target.checked
+            ? {
+                ...contract,
+                reinsurerNames: [...contract.reinsurerNames, val],
+                reinsurerIds: [
+                  ...contract.reinsurerIds,
+                  getId('reinsurerNames', val)
+                ]
+              }
+            : {
+                ...contract,
+                reinsurerNames: [
+                  ...contract.reinsurerNames.filter(item => item !== val)
+                ],
+                reinsurerIds: contract.reinsurerIds.filter(
+                  reinsurerId => reinsurerId !== getId('reinsurerNames', val)
+                )
+              }
+          : name === 'isRenewal'
+          ? val === 'true'
+            ? { ...contract, isRenewal: true }
+            : { ...contract, isRenewal: false }
+          : name === 'premium'
+          ? { ...contract, premium: parseInt(val.replace(/\s+/g, '')) }
+          : name === 'population'
+          ? { ...contract, population: parseInt(val.replace(/\s+/g, '')) }
+          : name === 'renewalProbability'
+          ? {
+              ...contract,
+              renewalProbability: parseInt(val.replace(/\s+/g, ''))
+            }
+          : { ...contract, [name]: val }
+      )
+    });
+  };
+
+  const onSubmit = e => {
+    e.preventDefault();
+
+    addContracts(formData);
   };
 
   return (
@@ -64,24 +312,8 @@ const CreateContracts = ({
       <h1 className="my-1">Создать контракты</h1>
       <p className="lead">Создайте новые контракты</p>
       <small>* поля, обязательные для заполнения</small>
-      <form>
+      <form onSubmit={e => onSubmit(e)}>
         <div className="contracts-parameters">
-          {/* <div className="form-group">
-            <label htmlFor="company">Компания *</label>
-            <input
-              type="text"
-              name="company"
-              id="company"
-              list="companies"
-              placeholder="Начните ввод..."
-            />
-            <datalist id="companies">
-              <option value="Coca-Cola"></option>
-              <option value="KSB"></option>
-              <option value="Lufhansa"></option>
-            </datalist>
-          </div>{' '} */}
-
           <div className="form-group">
             <label htmlFor="company">Компания *</label>
             <input
@@ -102,196 +334,137 @@ const CreateContracts = ({
                 ))}
             </datalist>
           </div>
-          <CreateContract />
-          {/* <div className="contract-parameters">
-            <div className="contract-parameters-header">Контракт №1</div>
-            <div className="contract-parameters-content">
-              <div className="form-group">
-                <label htmlFor="entity">Юрлицо *</label>
-                <input
-                  type="text"
-                  name="entity"
-                  id="entity"
-                  list="entities"
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="entities">
-                  <option value="Coca-Cola"></option>
-                  <option value="KSB"></option>
-                  <option value="Lufhansa"></option>
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="premium">Премия *</label>
-                <input
-                  type="number"
-                  name="premium"
-                  id="premium"
-                  placeholder="Начните ввод..."
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="contract-number">Номер договора *</label>
-                <input
-                  type="text"
-                  name="contract-number"
-                  id="contract-number"
-                  placeholder="Начните ввод..."
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="startDate">Дата начала *</label>
-                <input type="date" id="startDate" name="startDate" value="" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="renewal">Дата пролонгации *</label>
-                <input type="date" id="renewal" name="renewal" value="" />
-              </div>
-              <div className="form-group">
-                <label htmlFor="responsible">Ответственный *</label>
-                <input
-                  type="text"
-                  name="responsible"
-                  id="responsible"
-                  list="responsibles"
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="responsibles">
-                  <option value="Петров"></option>
-                  <option value="Левина"></option>
-                  <option value="Абмаева"></option>
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="reinsurers">Перестраховщики *</label>
-                <ul id="reinsurers">
-                  <li>
-                    <input
-                      id="0"
-                      type="checkbox"
-                      name="Insurope"
-                      value="Insurope"
-                    />
-                    Insurope
-                  </li>
-                  <li>
-                    <input
-                      id="1"
-                      type="checkbox"
-                      name="Zurich"
-                      value="Zurich"
-                    />
-                    Zurich
-                  </li>
-                  <li>
-                    <input id="2" type="checkbox" name="GenRe" value="GenRe" />
-                    GenRe
-                  </li>
-                  <li>
-                    <input id="3" type="checkbox" name="СУ" value="СУ" />
-                    СУ
-                  </li>
-                </ul>
-              </div>
-              <div className="form-group">
-                <label htmlFor="broker">Брокер *</label>
-                <input
-                  type="text"
-                  name="broker"
-                  id="broker"
-                  list="brokers"
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="brokers">
-                  <option value="Marsh"></option>
-                  <option value="Aon"></option>
-                  <option value="Willis"></option>
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="contact">Контактное лицо *</label>
-                <input
-                  type="text"
-                  name="contact"
-                  id="contact"
-                  list="contacts"
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="contacts">
-                  <option value="Елизавета Амбарян"></option>
-                  <option value="Елена Поезжаева"></option>
-                  <option value="Наталья Гришина"></option>
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label htmlFor="population">Численность *</label>
-                <input
-                  type="number"
-                  name="population"
-                  id="population"
-                  placeholder="Начните ввод..."
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="activity-type">ОКВЭД *</label>
-                <input
-                  type="text"
-                  name="activity-type"
-                  id="activity-type"
-                  list="activity-types"
-                  placeholder="Начните ввод..."
-                />
-                <datalist id="activity-types">
-                  <option value="Торговля"></option>
-                  <option value="Производство"></option>
-                  <option value="Развлечения"></option>
-                </datalist>
-              </div>
-              <div className="form-group">
-                <label>Упоминание в тендерах</label>
-                <div className="inline-group">
-                  <input type="radio" name="mention" id="yes" value="yes" />
-                  <label htmlFor="yes">Да</label>
-                </div>
-                <div className="inline-group">
-                  <input type="radio" name="mention" id="no" value="no" />
-                  <label htmlFor="no">Нет</label>
-                </div>
-                <div className="inline-group">
-                  <input
-                    type="radio"
-                    name="mention"
-                    id="unknown"
-                    value="unknown"
-                  />
-                  <label htmlFor="unknown">Не известно</label>
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Пролонгация *</label>
-                <div className="inline-group">
-                  <input type="radio" name="mention" id="yes" value="yes" />
-                  <label htmlFor="yes">Да</label>
-                </div>
-                <div className="inline-group">
-                  <input type="radio" name="mention" id="no" value="no" />
-                  <label htmlFor="no">Нет</label>
-                </div>
-              </div>
-              <div className="form-group">
-                <label htmlFor="comment">Комментарий</label>
-                <textarea name="comment" id="comment" rows="5"></textarea>
-              </div>
+          <div className="form-group" onChange={e => onChange(e)}>
+            <label>Упоминание в тендерах</label>
+            <div className="inline-group">
+              <input
+                type="radio"
+                name="rightToMention"
+                id="yes"
+                value="yes"
+                checked={rightToMention === 'yes'}
+                readOnly={true}
+              />
+              <label htmlFor="yes">Да</label>
             </div>
-          </div> */}
+            <div className="inline-group">
+              <input
+                type="radio"
+                name="rightToMention"
+                id="no"
+                value="no"
+                checked={rightToMention === 'no'}
+                readOnly={true}
+              />
+              <label htmlFor="no">Нет</label>
+            </div>
+            <div className="inline-group">
+              <input
+                type="radio"
+                name="rightToMention"
+                id="unknown"
+                value="unknown"
+                checked={rightToMention === 'unknown'}
+                readOnly={true}
+              />
+              <label htmlFor="unknown">Не известно</label>
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="responsible">Ответственный *</label>
+            <select
+              name="responsible"
+              id="responsible"
+              value={responsible}
+              onChange={e => onChange(e)}
+            >
+              <option />
+              {users &&
+                users.length > 0 &&
+                users.map(user => (
+                  <option key={user._id} value={user._id}>
+                    {user.secondName}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="broker">Брокер *</label>
+            <input
+              type="text"
+              name="broker"
+              id="broker"
+              list="brokers"
+              placeholder="Начните ввод..."
+              autoComplete="off"
+              value={broker}
+              onChange={e => {
+                onChange(e);
+                fillBrokerEmployees(e);
+              }}
+            />
+            <datalist id="brokers">
+              {brokers &&
+                brokers.length > 0 &&
+                brokers.map(broker => (
+                  <option key={broker._id} value={broker.name}></option>
+                ))}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label htmlFor="brokerEmployee">Сотрудник брокера *</label>
+            <input
+              type="text"
+              name="brokerEmployee"
+              id="brokerEmployee"
+              list="brokerEmployees"
+              placeholder="Начните ввод..."
+              autoComplete="off"
+              value={brokerEmployee}
+              onChange={e => onChange(e)}
+            />
+            <datalist id="brokerEmployees">
+              {brokerEmployees.map(employee => (
+                <option key={employee._id} value={employee.name}></option>
+              ))}
+            </datalist>
+          </div>
+          <div className="form-group">
+            <label htmlFor="commission">Комиссия, % *</label>
+            <input
+              type="number"
+              name="commission"
+              id="commission"
+              autoComplete="off"
+              value={commission}
+              onChange={e => onChange(e)}
+              placeholder="Начните ввод..."
+            />
+          </div>
+          {contracts.map(contract => (
+            <CreateContract
+              key={contract.id}
+              index={contracts.indexOf(contract) + 1}
+              entities={entities}
+              activityTypes={activityTypes}
+              contracts={contracts}
+              onContractDelete={onContractDelete}
+              contract={contract}
+              onContractChange={onContractChange}
+              // users={users}
+              reinsurers={reinsurers}
+              // brokers={brokers}
+            />
+          ))}
           <input
             type="button"
-            className="btn btn-primary btn-round"
+            className="btn btn-small btn-primary btn-round"
             value="Добавить еще один контракт +"
+            onClick={e => onContractAdd(e)}
           />
         </div>
         <input
-          type="button"
+          type="submit"
           className="btn btn-primary btn-block"
           value="Создать"
         />
@@ -301,13 +474,36 @@ const CreateContracts = ({
 };
 
 CreateContracts.propTypes = {
+  getEntities: PropTypes.func.isRequired,
+  entity: PropTypes.object.isRequired,
+  getActivityTypes: PropTypes.func.isRequired,
+  activityType: PropTypes.object.isRequired,
   opportunity: PropTypes.object.isRequired,
-  company: PropTypes.object.isRequired
+  company: PropTypes.object.isRequired,
+  getUsers: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  getReinsurers: PropTypes.func.isRequired,
+  reinsurer: PropTypes.object.isRequired,
+  getBrokers: PropTypes.func.isRequired,
+  broker: PropTypes.object.isRequired,
+  addContracts: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
+  entity: state.entity,
+  activityType: state.activityType,
   opportunity: state.opportunity,
-  company: state.company
+  company: state.company,
+  user: state.user,
+  reinsurer: state.reinsurer,
+  broker: state.broker
 });
 
-export default connect(mapStateToProps)(CreateContracts);
+export default connect(mapStateToProps, {
+  getEntities,
+  getActivityTypes,
+  getUsers,
+  getReinsurers,
+  getBrokers,
+  addContracts
+})(CreateContracts);

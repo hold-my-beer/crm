@@ -44,7 +44,7 @@ const ContractSchema = new mongoose.Schema({
     }
   ],
   broker: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'broker'
   },

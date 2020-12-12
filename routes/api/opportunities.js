@@ -277,7 +277,8 @@ router.get('/:id', ensureAuth, async (req, res) => {
     const opportunity = await Opportunity.findById(req.params.id)
       .populate('company', 'name')
       .populate('broker', 'name')
-      .populate('responsible', 'secondName');
+      .populate('responsible', 'secondName')
+      .populate('reinsurers', 'name');
 
     if (!opportunity) {
       return res.status(404).json({ msg: 'Тендер не найден' });

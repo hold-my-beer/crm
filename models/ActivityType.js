@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 const ActivityTypeSchema = new mongoose.Schema({
   code: {
     type: String,
-    required
+    required: true
   },
   name: {
     type: String,
-    required
+    required: true
   }
 });
 
 module.exports = ActivityType = mongoose.model(
   'activityType',
-  ActivityTypeSchema
+  ActivityTypeSchema,
+  'activityTypes'
 );
