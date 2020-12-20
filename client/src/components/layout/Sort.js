@@ -46,6 +46,24 @@ const Sort = ({ sortOptions, filteredRows, sortedRows, onSortChange }) => {
             : parseInt(b.premium) - parseInt(a.premium)
         );
         break;
+      case 'Ближайшее начало':
+        newSortedRows = [...filteredRows].sort((a, b) =>
+          !a.startDate
+            ? 1
+            : !b.startDate
+            ? -1
+            : Date.parse(a.startDate) - Date.parse(b.startDate)
+        );
+        break;
+      case 'Ближайшая следующая пролонгация':
+        newSortedRows = [...filteredRows].sort((a, b) =>
+          !a.nextRenewalDate
+            ? 1
+            : !b.nextRenewalDate
+            ? -1
+            : Date.parse(a.nextRenewalDate) - Date.parse(b.nextRenewalDate)
+        );
+        break;
       default:
         return;
     }

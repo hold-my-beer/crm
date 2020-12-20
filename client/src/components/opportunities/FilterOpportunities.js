@@ -789,7 +789,7 @@ const FilterOpportunities = ({
                 onChange={e => onToggleAny(e, 'populationTo')}
                 checked={anyPopulationTo}
               />
-              <label htmlFor="anyPremiumFrom">любого значения</label>
+              <label htmlFor="anyPopulationTo">любого значения</label>
             </div>
             <NumberFormat
               // type="number"

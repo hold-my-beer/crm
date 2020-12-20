@@ -7,6 +7,31 @@ const Contract = require('../../models/Contract');
 const Entity = require('../../models/Entity');
 const Company = require('../../models/Company');
 
+// @route   GET api/contracts
+// @desc    Get all contracts
+// @access  Private
+router.get('/', ensureAuth, async (req, res) => {
+  try {
+    const contracts = await Contract.find()
+      .populate('company' /*, 'name'*/)
+      // .populate('entity' /*, 'name'*/)
+      .populate({ path: 'entity', populate: { path: 'activityType' } })
+      .populate('responsible', 'secondName')
+      .populate('reinsurers', 'name')
+      .populate('broker', 'name')
+      .sort({ createdAt: -1 });
+
+    if (!contracts) {
+      return res.status(404).json({ msg: 'Контракты не найдены' });
+    }
+
+    return res.json(contracts);
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+  }
+});
+
 // @route   POST api/contracts
 // @desc    Create contracts
 // @access  Private
@@ -23,7 +48,7 @@ router.post(
         'commission',
         'Комиссия должна быть числом не менее 0 и не более 100'
       ).custom((val, req) => {
-        return val && parseFloat(val) >= 0 && parseFloat(val) <= 100;
+        return val !== '' && parseFloat(val) >= 0 && parseFloat(val) <= 100;
       }),
       check('contracts.*.entity', 'Укажите наименование юрлица')
         .not()
@@ -61,10 +86,10 @@ router.post(
       ).custom((val, req) => {
         return val && parseInt(val) > 0;
       }),
-      check(
-        'contracts.*.isRenewal',
-        'Укажите, является ли договор пролонгацией'
-      ).isBoolean(),
+      check('contracts.*.contractType', 'Укажите тип договора').isIn([
+        'Пролонгация',
+        'Новый'
+      ]),
       check(
         'contracts.*.renewalProbability',
         'Вероятность должна быть числом от 0 до 100'
@@ -145,7 +170,7 @@ router.post(
           // broker,
           // brokerEmployee,
           population,
-          isRenewal,
+          contractType,
           // commission,
           renewalProbability
         } = contract;
@@ -173,7 +198,7 @@ router.post(
               .json({ errors: [{ msg: 'Документ не найден' }] });
           }
 
-          if (name) entityToUpdate.name = name;
+          if (entity) entityToUpdate.name = entity;
           if (activityType) entityToUpdate.activityType = activityType;
           if (contactPerson) entityToUpdate.contactPerson = contactPerson;
           if (phoneNumber) entityToUpdate.phoneNumber = phoneNumber;
@@ -196,8 +221,8 @@ router.post(
           broker: brokerId ? brokerId : '',
           brokerEmployee: brokerEmployee ? brokerEmployee : '',
           population: population ? population : '',
-          isRenewal: isRenewal,
-          commission: commission ? commission : '',
+          contractType: contractType ? contractType : '',
+          commission: commission !== '' ? commission : '',
           renewalProbability: renewalProbability ? renewalProbability : '',
           createdBy: req.user.id
         });

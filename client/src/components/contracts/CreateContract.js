@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import NumberFormat from 'react-number-format';
 
@@ -11,7 +12,8 @@ const CreateContract = ({
   contract,
   onContractChange,
   // users,
-  reinsurers
+  reinsurers,
+  constant: { constant }
   // brokers
 }) => {
   const {
@@ -32,7 +34,7 @@ const CreateContract = ({
     // broker,
     // brokerEmployee,
     population,
-    isRenewal,
+    contractType,
     // commission,
     renewalProbability
   } = contract;
@@ -248,34 +250,58 @@ const CreateContract = ({
             placeholder="Начните ввод..."
           />
         </div>
-        <div className="form-group" onChange={e => onContractChange(id, e)}>
+        {/* <div className="form-group">
           <label>Пролонгация *</label>
           <div className="inline-group">
-            <input
-              type="radio"
-              name="isRenewal"
-              id="true"
-              value={true}
-              checked={isRenewal}
-              readOnly={true}
-            />
-            <label htmlFor="true">Да</label>
+            <label>
+              <input
+                type="radio"
+                name="isRenewal"
+                value="yes"
+                checked={isRenewal === 'yes'}
+                // readOnly={true}
+                onChange={e => onContractChange(id, e)}
+              />
+              Да
+            </label>
           </div>
           <div className="inline-group">
-            <input
-              type="radio"
-              name="isRenewal"
-              id="false"
-              value={false}
-              checked={!isRenewal}
-              readOnly={true}
-            />
-            <label htmlFor="false">Нет</label>
+            <label>
+              <input
+                type="radio"
+                name="isRenewal"
+                value="no"
+                checked={isRenewal === 'no'}
+                // readOnly={true}
+                onChange={e => onContractChange(id, e)}
+              />
+              Нет
+            </label>
           </div>
+        </div> */}
+
+        <div className="form-group">
+          <label htmlFor="contractType">Тип контракта *</label>
+          <select
+            name="contractType"
+            id="contractType"
+            value={contractType}
+            onChange={e => onContractChange(id, e)}
+          >
+            <option value="" />
+            {constant &&
+              constant.CONTRACT_TYPES.map(contractType => (
+                <option value={contractType}>{contractType}</option>
+              ))}
+            {/* <option value="Пролонгация">Пролонгация</option>
+            <option value="Новый">Новый</option> */}
+          </select>
         </div>
 
         <div className="form-group">
-          <label htmlFor="renewalProbability">Вероятность пролонгации, %</label>
+          <label htmlFor="renewalProbability">
+            Вероятность пролонгации, % *
+          </label>
           <input
             type="number"
             name="renewalProbability"
@@ -299,13 +325,18 @@ const CreateContract = ({
 
 CreateContract.propTypes = {
   index: PropTypes.number.isRequired,
-  contracts: PropTypes.array.isRequired,
+  entities: PropTypes.array.isRequired,
   activityTypes: PropTypes.array.isRequired,
   contracts: PropTypes.array.isRequired,
   onContractDelete: PropTypes.func.isRequired,
   contract: PropTypes.object.isRequired,
   onContractChange: PropTypes.func.isRequired,
-  reinsurers: PropTypes.array.isRequired
+  reinsurers: PropTypes.array.isRequired,
+  constant: PropTypes.object.isRequired
 };
 
-export default CreateContract;
+const mapStateToProps = state => ({
+  constant: state.constant
+});
+
+export default connect(mapStateToProps)(CreateContract);

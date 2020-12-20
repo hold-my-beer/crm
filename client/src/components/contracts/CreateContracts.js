@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
+import { getCompanies } from '../../actions/company';
 import { getEntities } from '../../actions/entity';
 import { getActivityTypes } from '../../actions/activityType';
 import { getUsers } from '../../actions/user';
@@ -13,6 +15,7 @@ import moment from 'moment';
 import CreateContract from './CreateContract';
 
 const CreateContracts = ({
+  getCompanies,
   getEntities,
   entity: { entities },
   getActivityTypes,
@@ -25,7 +28,8 @@ const CreateContracts = ({
   reinsurer: { reinsurers },
   getBrokers,
   broker: { brokers },
-  addContracts
+  addContracts,
+  history
 }) => {
   const [formData, setFormData] = useState({
     company: '',
@@ -40,6 +44,7 @@ const CreateContracts = ({
       {
         id: uuidv4(),
         entity: '',
+        entityId: '',
         activityType: '',
         contactPerson: '',
         phoneNumber: '',
@@ -55,9 +60,9 @@ const CreateContracts = ({
         // broker: '',
         // brokerEmployee: '',
         population: '',
-        isRenewal: false,
+        contractType: '',
         // commission: '',
-        renewalProbability: ''
+        renewalProbability: 100
       }
     ]
   });
@@ -94,12 +99,21 @@ const CreateContracts = ({
         }
         return '';
       }
+      case 'entity': {
+        for (let i = 0; i < entities.length; i++) {
+          if (entities[i].name === val) {
+            return entities[i]._id;
+          }
+        }
+        return '';
+      }
       case 'okved': {
         for (let i = 0; i < activityTypes.length; i++) {
           if (activityTypes[i].code === val) {
             return activityTypes[i]._id;
           }
         }
+        return '';
       }
       case 'reinsurerNames': {
         for (let i = 0; i < reinsurers.length; i++) {
@@ -107,7 +121,7 @@ const CreateContracts = ({
             return reinsurers[i]._id;
           }
         }
-        break;
+        return '';
       }
       default:
         return '';
@@ -167,6 +181,10 @@ const CreateContracts = ({
   }, [opportunity]);
 
   useEffect(() => {
+    getCompanies();
+  }, [getCompanies]);
+
+  useEffect(() => {
     getEntities();
   }, [getEntities]);
 
@@ -209,38 +227,46 @@ const CreateContracts = ({
         {
           id: uuidv4(),
           entity: '',
+          entityId: '',
           activityType: contracts.length ? contracts[0].activityType : '',
           contactPerson: contracts.length ? contracts[0].contactPerson : '',
           phoneNumber: contracts.length ? contracts[0].phoneNumber : '',
           email: contracts.length ? contracts[0].email : '',
           premium: '',
           number: '',
-          startDate: !opportunity.renewalDate
-            ? ''
-            : moment(opportunity.renewalDate).format('YYYY-MM-DD'),
-          endDate: !opportunity.renewalDate
-            ? ''
-            : moment(opportunity.renewalDate)
-                .add(1, 'years')
-                .format('YYYY-MM-DD'),
-          nextRenewalDate: !opportunity.renewalDate
-            ? ''
-            : moment(opportunity.renewalDate)
-                .add(1, 'years')
-                .format('YYYY-MM-DD'),
+          startDate:
+            !opportunity || !opportunity.renewalDate
+              ? ''
+              : moment(opportunity.renewalDate).format('YYYY-MM-DD'),
+          endDate:
+            !opportunity || !opportunity.renewalDate
+              ? ''
+              : moment(opportunity.renewalDate)
+                  .add(1, 'years')
+                  .format('YYYY-MM-DD'),
+          nextRenewalDate:
+            !opportunity || !opportunity.renewalDate
+              ? ''
+              : moment(opportunity.renewalDate)
+                  .add(1, 'years')
+                  .format('YYYY-MM-DD'),
           // responsible: '',
-          reinsurerNames: !opportunity.reinsurers.length
-            ? []
-            : opportunity.reinsurers.map(reinsurer => reinsurer.name),
-          reinsurerIds: !opportunity.reinsurers.length
-            ? []
-            : opportunity.reinsurers.map(reinsurer => reinsurer._id),
+          reinsurerNames:
+            !opportunity || !opportunity.reinsurers.length
+              ? []
+              : opportunity.reinsurers.map(reinsurer => reinsurer.name),
+          reinsurerIds:
+            !opportunity || !opportunity.reinsurers.length
+              ? []
+              : opportunity.reinsurers.map(reinsurer => reinsurer._id),
           // broker: '',
           // brokerEmployee: '',
           population: '',
-          isRenewal: contracts.length ? contracts[0].isRenewal : '',
+          contractType: contracts.length ? contracts[0].contractType : '',
           // commission: '',
-          renewalProbability: ''
+          renewalProbability: contracts.length
+            ? contracts[0].renewalProbability
+            : 100
         }
       ]
     });
@@ -262,6 +288,8 @@ const CreateContracts = ({
       contracts: contracts.map(contract =>
         contract.id !== contractId
           ? contract
+          : name === 'entity'
+          ? { ...contract, entity: val, entityId: getId('entity', val) }
           : name === 'code'
           ? { ...contract, activityType: getId('okved', val) }
           : name === 'reinsurerNames'
@@ -283,11 +311,11 @@ const CreateContracts = ({
                   reinsurerId => reinsurerId !== getId('reinsurerNames', val)
                 )
               }
-          : name === 'isRenewal'
-          ? val === 'true'
-            ? { ...contract, isRenewal: true }
-            : { ...contract, isRenewal: false }
-          : name === 'premium'
+          : // : name === 'isRenewal'
+          // ? val === 'true'
+          //   ? { ...contract, isRenewal: true }
+          //   : { ...contract, isRenewal: false }
+          name === 'premium'
           ? { ...contract, premium: parseInt(val.replace(/\s+/g, '')) }
           : name === 'population'
           ? { ...contract, population: parseInt(val.replace(/\s+/g, '')) }
@@ -304,7 +332,7 @@ const CreateContracts = ({
   const onSubmit = e => {
     e.preventDefault();
 
-    addContracts(formData);
+    addContracts(formData, history);
   };
 
   return (
@@ -341,8 +369,8 @@ const CreateContracts = ({
                 type="radio"
                 name="rightToMention"
                 id="yes"
-                value="yes"
-                checked={rightToMention === 'yes'}
+                value="Да"
+                checked={rightToMention === 'Да'}
                 readOnly={true}
               />
               <label htmlFor="yes">Да</label>
@@ -352,8 +380,8 @@ const CreateContracts = ({
                 type="radio"
                 name="rightToMention"
                 id="no"
-                value="no"
-                checked={rightToMention === 'no'}
+                value="Нет"
+                checked={rightToMention === 'Нет'}
                 readOnly={true}
               />
               <label htmlFor="no">Нет</label>
@@ -363,8 +391,8 @@ const CreateContracts = ({
                 type="radio"
                 name="rightToMention"
                 id="unknown"
-                value="unknown"
-                checked={rightToMention === 'unknown'}
+                value="Не известно"
+                checked={rightToMention === 'Не известно'}
                 readOnly={true}
               />
               <label htmlFor="unknown">Не известно</label>
@@ -466,7 +494,7 @@ const CreateContracts = ({
         <input
           type="submit"
           className="btn btn-primary btn-block"
-          value="Создать"
+          value="Создать контракты"
         />
       </form>
     </div>
@@ -474,6 +502,7 @@ const CreateContracts = ({
 };
 
 CreateContracts.propTypes = {
+  getCompanies: PropTypes.func.isRequired,
   getEntities: PropTypes.func.isRequired,
   entity: PropTypes.object.isRequired,
   getActivityTypes: PropTypes.func.isRequired,
@@ -500,10 +529,11 @@ const mapStateToProps = state => ({
 });
 
 export default connect(mapStateToProps, {
+  getCompanies,
   getEntities,
   getActivityTypes,
   getUsers,
   getReinsurers,
   getBrokers,
   addContracts
-})(CreateContracts);
+})(withRouter(CreateContracts));

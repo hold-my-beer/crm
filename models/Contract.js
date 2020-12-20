@@ -56,8 +56,8 @@ const ContractSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  isRenewal: {
-    type: Boolean,
+  contractType: {
+    type: String,
     required: true
   },
   commission: {

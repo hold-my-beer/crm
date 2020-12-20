@@ -113,9 +113,9 @@ const Opportunities = ({
         opportunity.quoteType,
         opportunity.renewalDate ? new Date(opportunity.renewalDate) : '',
         opportunity.reinsurers.length
-          ? opportunity.reinsurers.map(
-              reinsurer => reinsurer && reinsurer.name + ' '
-            )
+          ? opportunity.reinsurers
+              .map(reinsurer => ` ${reinsurer.name}`)
+              .toString()
           : '',
         opportunity.premium ? opportunity.premium : '',
         opportunity.population ? opportunity.population : '',

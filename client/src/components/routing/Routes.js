@@ -12,6 +12,7 @@ import EditOpportunity from '../opportunities/EditOpportunity';
 import Leads from '../leads/Leads';
 import CreateLead from '../leads/CreateLead';
 import EditLead from '../leads/EditLead';
+import Contracts from '../contracts/Contracts';
 import CreateContracts from '../contracts/CreateContracts';
 import DeleteModal from '../layout/DeleteModal';
 
@@ -43,6 +44,7 @@ const Routes = () => {
           <PrivateRoute exact path="/leads" component={Leads} />
           <PrivateRoute exact path="/create-lead" component={CreateLead} />
           <PrivateRoute exact path="/edit-lead/:id" component={EditLead} />
+          <PrivateRoute exact path="/contracts" component={Contracts} />
           <PrivateRoute
             exact
             path="/create-contracts"

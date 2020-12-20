@@ -99,10 +99,10 @@ const Pagination = ({ sortedRows, displayedRows, onPageParamsChange }) => {
   }, [sortedRows]);
 
   useEffect(() => {
-    const newDisplayedRows = [...sortedRows].splice(startPosition, endPosition);
+    const newDisplayedRows = [...sortedRows].splice(startPosition, rowsPerPage);
 
     onPageParamsChange(newDisplayedRows);
-  }, [startPosition, endPosition, sortedRows]);
+  }, [startPosition, rowsPerPage, sortedRows]);
 
   return (
     <div className="pagination">
