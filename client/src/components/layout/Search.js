@@ -13,7 +13,6 @@ const Search = ({
 
   const onSearchValueChange = e => {
     const val = e.target.value;
-    console.log(val);
 
     setSearchValue(val);
     const newFilteredRows = filterRows(val);

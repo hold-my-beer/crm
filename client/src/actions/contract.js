@@ -1,7 +1,9 @@
 import axios from 'axios';
 import {
   GET_CONTRACTS,
+  GET_CONTRACT,
   ADD_CONTRACTS,
+  UPDATE_CONTRACT,
   CONTRACT_ERROR,
   SET_CONTRACT_LOADING
 } from './types';
@@ -16,6 +18,31 @@ export const getContracts = () => async dispatch => {
 
     dispatch({
       type: GET_CONTRACTS,
+      payload: res.data
+    });
+  } catch (err) {
+    const errors = err.response.data.errors;
+
+    if (errors) {
+      errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+    }
+
+    dispatch({
+      type: CONTRACT_ERROR,
+      payload: errors
+    });
+  }
+};
+
+// Get contract by id
+export const getContractById = id => async dispatch => {
+  dispatch(setContractLoading());
+
+  try {
+    const res = await axios.get(`/api/contracts/${id}`);
+
+    dispatch({
+      type: GET_CONTRACT,
       payload: res.data
     });
   } catch (err) {
@@ -66,6 +93,8 @@ export const addContracts = (formData, history) => async dispatch => {
     });
   }
 };
+
+//
 
 // Set contract loading
 export const setContractLoading = () => dispatch => {

@@ -1,12 +1,15 @@
 import {
   GET_CONTRACTS,
+  GET_CONTRACT,
   ADD_CONTRACTS,
+  UPDATE_CONTRACT,
   CONTRACT_ERROR,
   SET_CONTRACT_LOADING
 } from '../actions/types';
 
 const initialState = {
   contracts: [],
+  contract: null,
   newContracts: [],
   errors: [],
   loading: false
@@ -20,6 +23,13 @@ export default function (state = initialState, action) {
       return {
         ...state,
         contracts: payload,
+        loading: false
+      };
+    case GET_CONTRACT:
+    case UPDATE_CONTRACT:
+      return {
+        ...state,
+        contract: payload,
         loading: false
       };
     case ADD_CONTRACTS:

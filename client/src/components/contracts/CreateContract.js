@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import NumberFormat from 'react-number-format';
+import { v4 as uuidv4 } from 'uuid';
 
 const CreateContract = ({
   index,
@@ -291,7 +292,9 @@ const CreateContract = ({
             <option value="" />
             {constant &&
               constant.CONTRACT_TYPES.map(contractType => (
-                <option value={contractType}>{contractType}</option>
+                <option key={uuidv4()} value={contractType}>
+                  {contractType}
+                </option>
               ))}
             {/* <option value="Пролонгация">Пролонгация</option>
             <option value="Новый">Новый</option> */}
