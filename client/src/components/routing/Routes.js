@@ -14,6 +14,7 @@ import CreateLead from '../leads/CreateLead';
 import EditLead from '../leads/EditLead';
 import Contracts from '../contracts/Contracts';
 import CreateContracts from '../contracts/CreateContracts';
+import EditContract from '../contracts/EditContract';
 import DeleteModal from '../layout/DeleteModal';
 
 const Routes = () => {
@@ -49,6 +50,11 @@ const Routes = () => {
             exact
             path="/create-contracts"
             component={CreateContracts}
+          />
+          <PrivateRoute
+            exact
+            path="/edit-contract/:id"
+            component={EditContract}
           />
         </Switch>
       </div>

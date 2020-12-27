@@ -32,12 +32,51 @@ router.get('/', ensureAuth, async (req, res) => {
   }
 });
 
+// @route   GET api/contracts/nearest
+// @desc    Get limited number of nearest contracts by start date
+// @access  Private
+router.get(
+  '/nearest',
+  [
+    ensureAuth,
+    [
+      check(
+        'limit',
+        'Укажите корректный лимит на возвращаемое количество документов'
+      ).isInt()
+    ]
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const contracts = await Contract.find()
+        .sort({ createdAt: -1 })
+        .limit(parseInt(req.query.limit))
+        .populate('company', 'name');
+
+      return res.json(contracts);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+    }
+  }
+);
+
 // @route   GET api/contracts/:id
 // @desc    Get contract by id
 // @access  Private
 router.get('/:id', ensureAuth, async (req, res) => {
   try {
-    const contract = await Contract.findById(req.params.id);
+    const contract = await Contract.findById(req.params.id)
+      .populate('company')
+      .populate({ path: 'entity', populate: { path: 'activityType' } })
+      .populate('responsible', 'secondName')
+      .populate('reinsurers', 'name')
+      .populate('broker', 'name');
 
     if (!contract) {
       return res.status(404).json({ errors: [{ msg: 'Документ не найден' }] });
@@ -444,7 +483,8 @@ router.put(
       if (population !== '') contract.population = population;
       if (contractType) contract.contractType = contractType;
       if (commission !== '') contract.commission = commission;
-      if (renewalProbability !== '') renewalProbability = renewalProbability;
+      if (renewalProbability !== '')
+        contract.renewalProbability = renewalProbability;
       contract.createdBy = req.user.id;
 
       await contract.save();
@@ -462,5 +502,23 @@ router.put(
     }
   }
 );
+
+// @route   DELETE api/contracts/:id
+// @desc    Delete contract
+// @access  Private
+router.delete('/:id', ensureAuth, async (req, res) => {
+  try {
+    await Contract.findByIdAndDelete(req.params.id);
+
+    return res.json({ msg: 'Контракт успешно удален' });
+  } catch (err) {
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ errors: [{ msg: 'Документ не найден' }] });
+    }
+
+    console.error(err.message);
+    return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+  }
+});
 
 module.exports = router;

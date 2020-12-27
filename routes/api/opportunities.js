@@ -269,6 +269,47 @@ router.get('/', ensureAuth, async (req, res) => {
   }
 });
 
+// @route   GET api/opportunities/opened
+// @desc    Get limited number of opened opportunities
+// @access  Private
+router.get(
+  '/opened',
+  [
+    ensureAuth,
+    [
+      check(
+        'limit',
+        'Укажите корректный лимит на возвращаемое количество документов'
+      ).isInt()
+    ]
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const opportunities = await Opportunity.find({
+        status: { $in: ['В работе', 'Отправлено'] }
+      })
+        .sort({ premium: -1 })
+        .limit(parseInt(req.query.limit))
+        .populate('company', 'name');
+
+      if (!opportunities) {
+        return res.json([]);
+      }
+
+      return res.json(opportunities);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+    }
+  }
+);
+
 // @route   GET api/opportunities/:id
 // @desc    Get opportunity by id
 // @access  Private

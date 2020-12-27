@@ -242,6 +242,41 @@ router.get('/', ensureAuth, async (req, res) => {
   }
 });
 
+// @route   GET api/leads/nearest
+// @desc    Get limited number of nearest leads by contact date
+// @access  Private
+router.get(
+  '/nearest',
+  [
+    ensureAuth,
+    [
+      check(
+        'limit',
+        'Укажите корректный лимит на возвращаемое количество документов'
+      ).isInt()
+    ]
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const leads = await Lead.find(/*{ contactDate: { $gte: Date.now() } }*/)
+        .sort({ contactDate: 1 })
+        .limit(parseInt(req.query.limit))
+        .populate('company', 'name');
+
+      return res.json(leads);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ errors: [{ msg: 'Ошибка сервера' }] });
+    }
+  }
+);
+
 // @route   GET api/leads/:id
 // @desc    Get lead by id
 // @access  Private

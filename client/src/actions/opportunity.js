@@ -5,6 +5,7 @@ import {
   SET_OPPORTUNITY_LOADING,
   OPPORTUNITY_ERROR,
   GET_OPPORTUNITIES,
+  GET_OPENED_OPPORTUNITIES,
   GET_OPPORTUNITY,
   DELETE_OPPORTUNITY,
   RESET_DELETE
@@ -22,6 +23,38 @@ export const getOpportunities = () => async dispatch => {
 
     dispatch({
       type: GET_OPPORTUNITIES,
+      payload: res.data
+    });
+  } catch (err) {
+    const errors = err.response.data.errors;
+
+    if (errors) {
+      errors.forEach(error => dispatch(setAlert(error.msg, 'danger')));
+    }
+
+    dispatch({
+      type: OPPORTUNITY_ERROR,
+      payload: errors
+    });
+  }
+};
+
+// Get limited number of opened opportunities
+export const getOpenedOpportunities = (limit = 3) => async dispatch => {
+  dispatch(setOpportunityLoading());
+
+  dispatch(removeAlert());
+
+  try {
+    const params = new URLSearchParams();
+    params.set('limit', limit);
+
+    const res = await axios.get('/api/opportunities/opened', {
+      params: params
+    });
+
+    dispatch({
+      type: GET_OPENED_OPPORTUNITIES,
       payload: res.data
     });
   } catch (err) {

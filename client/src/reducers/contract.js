@@ -1,8 +1,10 @@
 import {
   GET_CONTRACTS,
+  GET_NEAREST_CONTRACTS,
   GET_CONTRACT,
   ADD_CONTRACTS,
   UPDATE_CONTRACT,
+  DELETE_CONTRACT,
   CONTRACT_ERROR,
   SET_CONTRACT_LOADING
 } from '../actions/types';
@@ -20,6 +22,7 @@ export default function (state = initialState, action) {
 
   switch (type) {
     case GET_CONTRACTS:
+    case GET_NEAREST_CONTRACTS:
       return {
         ...state,
         contracts: payload,
@@ -36,6 +39,12 @@ export default function (state = initialState, action) {
       return {
         ...state,
         newContracts: payload,
+        loading: false
+      };
+    case DELETE_CONTRACT:
+      return {
+        ...state,
+        contract: null,
         loading: false
       };
     case CONTRACT_ERROR:

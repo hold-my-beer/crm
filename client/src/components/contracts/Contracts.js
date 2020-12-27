@@ -111,7 +111,7 @@ const Contracts = ({
   useEffect(() => {
     let data = [];
 
-    if (sortedContracts.length) {
+    if (!loading && sortedContracts.length) {
       data = sortedContracts.map(contract => [
         contract.entity.name,
         contract.company.name,
@@ -302,7 +302,10 @@ const Contracts = ({
                       />
                     )}
                   </td>
-                  <td>{contract.entity.activityType.name}</td>
+                  <td>
+                    {contract.entity.activityType &&
+                      contract.entity.activityType.name}
+                  </td>
                   <td>{contract.entity.contactPerson}</td>
                   <td>{contract.entity.phoneNumber}</td>
                   <td>{contract.entity.email}</td>

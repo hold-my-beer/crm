@@ -1,5 +1,6 @@
 import {
   GET_LEADS,
+  GET_NEAREST_LEADS,
   GET_LEAD,
   ADD_LEAD,
   UPDATE_LEAD,
@@ -20,6 +21,7 @@ export default function (state = initialState, action) {
 
   switch (type) {
     case GET_LEADS:
+    case GET_NEAREST_LEADS:
       return {
         ...state,
         leads: payload,

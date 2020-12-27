@@ -1,5 +1,6 @@
 import {
   GET_OPPORTUNITIES,
+  GET_OPENED_OPPORTUNITIES,
   GET_OPPORTUNITY,
   ADD_OPPORTUNITY,
   UPDATE_OPPORTUNITY,
@@ -20,6 +21,7 @@ export default function (state = initialState, action) {
 
   switch (type) {
     case GET_OPPORTUNITIES:
+    case GET_OPENED_OPPORTUNITIES:
       return {
         ...state,
         opportunities: payload,
